@@ -336,32 +336,115 @@ BGE（BAAI General Embedding）是 FlagEmbedding 的核心产品线，提供了�
 
 #### 2.1.1 Encoder-only 重排序器
 
+```mermaid
+flowchart TD
+    A[查询 Query] --> C[拼接输入]
+    B[文档 Document] --> C
+    C --> D[Tokenizer]
+    D --> E[Encoder Transformer]
+    E --> F[CLS Token Pooling]
+    F --> G[线性层 Linear Layer]
+    G --> H[Sigmoid 激活]
+    H --> I[相关性分数 Score]
+    
+    style E fill:#e1f5ff
+    style F fill:#fff4e1
+```
+
 `bge-reranker-base`、`bge-reranker-large`、`bge-reranker-v2-m3`：
 - 基于 Cross-Encoder 架构
 - 将查询和文档拼接输入
+- 使用 CLS token 进行分类
 - 输出相关性分数
 - 性能优异但计算成本较高
 
 #### 2.1.2 Decoder-only 重排序器
 
+```mermaid
+flowchart TD
+    A[查询 Query] --> C
+    B[文档 Document] --> C[格式化输入]
+    C --> D[Tokenizer]
+    D --> E[Decoder Transformer]
+    E --> F[Last Token Pooling]
+    F --> G[线性层 Linear Layer]
+    G --> H[Score Head]
+    H --> I[相关性分数 Score]
+    
+    style E fill:#f0e6ff
+    style F fill:#e6f7ff
+```
+
 `bge-reranker-v2-gemma`：
 - 基于 Gemma 大模型
 - 使用 Decoder-only 架构
+- 使用 Last Token Pooling
 - 更强的语义理解能力
 
 #### 2.1.3 Layer-wise 重排序器
 
+```mermaid
+flowchart TD
+    A[查询 Query] --> F
+    B[文档 Document] --> F[输入格式化]
+    F --> G[Tokenizer]
+    G --> H[Decoder Transformer]
+    
+    H --> I[层1输出]
+    H --> J[层2输出]
+    H --> K[...中间层...]
+    H --> L[最后层输出]
+    
+    I --> M[层融合 Layer Fusion]
+    J --> M
+    K --> M
+    L --> M
+    
+    M --> N[加权融合 Weighted Sum]
+    N --> O[Score Head]
+    O --> P[相关性分数 Score]
+    
+    style H fill:#fff0f5
+    style M fill:#f0fff4
+    style N fill:#fff8e6
+```
+
 `bge-reranker-v2-minicpm-layerwise`：
 - 基于 MiniCPM 模型
+- 提取多层隐藏状态
 - 使用层输出融合技术
+- 加权融合多层信息
 - 更好的信息利用
 
 #### 2.1.4 Lightweight 重排序器
 
+```mermaid
+flowchart TD
+    A[查询 Query] --> C
+    B[文档 Document] --> C[高效输入处理]
+    C --> D[优化 Tokenizer]
+    D --> E[轻量级 Decoder]
+    E --> F[轻量化 Pooling]
+    F --> G[快速 Score Head]
+    G --> H[相关性分数 Score]
+    
+    note over D,E,F
+        优化特点：
+        - 量化 Quantization
+        - 剪枝 Pruning
+        - 蒸馏 Distillation
+    end
+    
+    style E fill:#e8fff0
+    style F fill:#fffce6
+```
+
 `bge-reranker-v2.5-gemma2-lightweight`：
 - 基于 Gemma2 的轻量级版本
+- 量化/剪枝/蒸馏优化
 - 优化的推理速度
 - 保持较高重排序质量
+- 适合资源受限场景
 
 参考代码文件：[model_mapping.py](file:///workspace/FlagEmbedding/inference/reranker/model_mapping.py#L31-L56)
 
