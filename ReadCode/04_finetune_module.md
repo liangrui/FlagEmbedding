@@ -1,5 +1,104 @@
 # FlagEmbedding 微调模块详细分析
 
+## 模块架构总览
+
+```mermaid
+flowchart TB
+    subgraph 抽象层["抽象基类层 abc/finetune/"]
+        AbsEM[AbsEmbedderModel]
+        AbsRM[AbsRerankerModel]
+        AbsD[AbsDataset]
+        AbsT[AbsTrainer]
+    end
+    
+    subgraph Embedder微调["Embedder微调"]
+        BEM[BiEncoderOnlyEmbedderModel]
+        M3EM[EncoderOnlyEmbedderM3Model]
+        DEM[BiDecoderOnlyEmbedderModel]
+        ICLEM[BiDecoderOnlyEmbedderICLModel]
+    end
+    
+    subgraph Reranker微调["Reranker微调"]
+        CEM[CrossEncoderModel]
+        CDM[CrossDecoderModel]
+        CDLM[CrossDecoderModel Layerwise]
+    end
+    
+    subgraph 数据["数据层"]
+        TrainData[训练数据]
+        Collator[DataCollator]
+    end
+    
+    subgraph 损失["损失函数"]
+        CEL[CrossEntropy]
+        KL[KL散度]
+        M3KD[M3蒸馏]
+    end
+    
+    AbsEM --> BEM
+    AbsEM --> M3EM
+    AbsEM --> DEM
+    AbsEM --> ICLEM
+    AbsRM --> CEM
+    AbsRM --> CDM
+    AbsRM --> CDLM
+    
+    AbsD --> TrainData
+    AbsT --> AbsEM
+    TrainData --> Collator
+    Collator --> AbsEM
+    
+    BEM --> CEL
+    M3EM --> M3KD
+```
+
+### 训练流程时序图
+
+```mermaid
+sequenceDiagram
+    participant User as 用户
+    participant Runner as AbsEmbedderRunner
+    participant Trainer as AbsEmbedderTrainer
+    participant Model as BiEncoderOnlyEmbedderModel
+    participant Dataset as AbsEmbedderTrainDataset
+    participant Collator as AbsEmbedderCollator
+    
+    User->>Runner: run()
+    Runner->>Dataset: load_train_dataset()
+    Runner->>Collator: load_data_collator()
+    Runner->>Trainer: load_trainer()
+    Trainer->>Dataset: __getitem__()
+    Dataset-->>Trainer: (query, passages, scores)
+    
+    loop Training Epoch
+        Trainer->>Collator: __call__(batch)
+        Collator-->>Trainer: {queries, passages, teacher_scores}
+        Trainer->>Model: forward(queries, passages)
+        Model->>Model: encode(queries)
+        Model->>Model: encode(passages)
+        Model->>Model: compute_score(q_reps, p_reps)
+        Model->>Model: compute_loss(scores, target)
+        Model-->>Trainer: loss
+        Trainer->>Trainer: loss.backward()
+        Trainer->>Trainer: optimizer.step()
+    end
+    
+    Trainer-->>Runner: 训练完成
+    Runner-->>User: 模型已保存
+```
+
+### 核心训练机制对比表
+
+| 机制 | 类型 | 作用 | 实现文件 |
+|------|------|------|---------|
+| **批内负样本** | 负采样 | 同一batch内样本互为负例 | AbsEmbedderModel |
+| **跨设备负样本** | 分布式 | 多GPU共享负例池 | AbsEmbedderModel |
+| **知识蒸馏** | 训练策略 | 教师→学生知识传递 | distill_loss() |
+| **MRL** | 表示学习 | 嵌套维度训练 | forward() |
+| **自蒸馏** | 训练策略 | 集成→单分支 | EncoderOnlyEmbedderM3Model |
+
+---
+
 ## 目录
 - [整体架构概述](#整体架构概述)
 - [抽象基类层](#抽象基类层)

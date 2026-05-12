@@ -1,5 +1,115 @@
 # FlagEmbedding 评估模块详解
 
+## 模块架构总览
+
+```mermaid
+flowchart TB
+    subgraph 数据层["数据层"]
+        Corpus[语料库]
+        Queries[查询集]
+        Qrels[相关性标注]
+    end
+    
+    subgraph 加载器["数据加载器"]
+        MTEB[MTMEB]
+        BEIR[BEIR]
+        MSMARCO[MSMARCO]
+        MIRACL[MIRACL]
+        MKQA[MKQA]
+        MLDR[MLDR]
+        AIR[AIR-Bench]
+        BRIGHT[BRIGHT]
+    end
+    
+    subgraph 核心["评估核心"]
+        Runner[AbsEvalRunner]
+        Evaluator[AbsEvaluator]
+        Retriever[EvalDenseRetriever]
+        Reranker[EvalReranker]
+    end
+    
+    subgraph 输出["结果输出"]
+        JSON[JSON格式]
+        MD[Markdown表格]
+        Metrics[评估指标]
+    end
+    
+    Corpus --> Runner
+    Queries --> Runner
+    Qrels --> Runner
+    
+    MTEB -.-> Runner
+    BEIR -.-> Runner
+    MSMARCO -.-> Runner
+    MIRACL -.-> Runner
+    MKQA -.-> Runner
+    MLDR -.-> Runner
+    AIR -.-> Runner
+    BRIGHT -.-> Runner
+    
+    Runner --> Evaluator
+    Evaluator --> Retriever
+    Evaluator --> Reranker
+    
+    Retriever --> Metrics
+    Reranker --> Metrics
+    
+    Metrics --> JSON
+    Metrics --> MD
+```
+
+### 评估流程时序图
+
+```mermaid
+sequenceDiagram
+    participant User as 用户
+    participant Runner as AbsEvalRunner
+    participant Loader as 数据加载器
+    participant Retriever as EvalDenseRetriever
+    participant Reranker as EvalReranker
+    participant Evaluator as AbsEvaluator
+    
+    User->>Runner: run()
+    Runner->>Loader: load_corpus()
+    Loader-->>Runner: corpus
+    Runner->>Loader: load_queries()
+    Loader-->>Runner: queries
+    
+    par 并行处理多个数据集
+        loop 每个split
+            Runner->>Retriever: encode_corpus(corpus)
+            Runner->>Retriever: encode_queries(queries)
+            Retriever->>Retriever: Faiss检索
+            Retriever-->>Runner: search_results
+            
+            alt 有Reranker
+                Runner->>Reranker: compute_score()
+                Reranker-->>Runner: reranked_results
+            end
+            
+            Runner->>Evaluator: evaluate()
+            Evaluator->>Evaluator: compute_metrics()
+        end
+    end
+    
+    Runner-->>User: 评估完成
+```
+
+### 支持的评估基准对比表
+
+| 基准 | 任务类型 | 语言数 | 数据规模 | 特点 |
+|------|---------|-------|---------|------|
+| **MTEB** | 多任务 | 多语言 | 中 | 任务类型最全 |
+| **BEIR** | 异构检索 | 英语 | 15数据集 | 异构数据集 |
+| **MSMARCO** | 阅读理解 | 英语 | 大规模 | passage/document |
+| **MIRACL** | 多语言检索 | 18种 | 中 | 专注于多语言 |
+| **MKQA** | 知识问答 | 26种 | 中 | 多语言问答 |
+| **MLDR** | 长文档检索 | 13种 | 中 | 长文本 |
+| **AIR-Bench** | 实际场景 | 多语言 | 不定 | 第三方库 |
+| **BRIGHT** | 多粒度 | 多语言 | 小 | short/long任务 |
+
+---
+
 ## 目录
 - [1. 整体架构](#1-整体架构)
 - [2. 抽象基类分析](#2-抽象基类分析)

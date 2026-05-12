@@ -1,5 +1,97 @@
 # FlagEmbedding 研究项目分析
 
+## 模块架构总览
+
+```mermaid
+flowchart TB
+    subgraph 核心模型["核心研究成果"]
+        BGE[BGE系列模型<br/>M3/VL/Code]
+        RER[Reranker系列<br/>Encoder/LLM]
+    end
+    
+    subgraph 增强技术["增强与优化技术"]
+        COCKTAIL[LM-Cocktail<br/>模型融合]
+        BEACON[Activation-Beacon<br/>长上下文]
+        MRL[Matryoshka<br/>嵌套表示]
+    end
+    
+    subgraph 专用领域["专用嵌入模型"]
+        LLM_EMB[LLM-Embedder<br/>LLM优化]
+        CODE[BGE-Code<br/>代码检索]
+    end
+    
+    subgraph 数据与基准["数据与评估基准"]
+        MEGAPAIRS[MegaPairs<br/>多模态数据]
+        MLDR[MLDR<br/>多语言长文档]
+        CMTEB[C-MTEB<br/>中文基准]
+    end
+    
+    subgraph 应用场景["应用场景"]
+        QA[问答检索]
+        CODE_SEARCH[代码检索]
+        MULTIMODAL[多模态检索]
+        LONG_CTX[长上下文]
+    end
+    
+    BGE --> COCKTAIL
+    BGE --> RER
+    BGE --> MRL
+    BGE --> QA
+    BGE --> CODE_SEARCH
+    BGE --> MULTIMODAL
+    
+    LLM_EMB --> QA
+    LLM_EMB --> LONG_CTX
+    
+    BEACON --> LONG_CTX
+    
+    MEGAPAIRS --> MULTIMODAL
+    CODE --> CODE_SEARCH
+    
+    BGE -.-> LLM_EMB
+    RER -.-> LLM_EMB
+```
+
+### 核心研究项目对比表
+
+| 项目 | 类别 | 核心创新 | 适用场景 | 性能亮点 |
+|------|------|---------|---------|---------|
+| **BGE-M3** | 核心模型 | 多功能+多语言+多粒度 | 通用检索 | SOTA 性能 |
+| **LM-Cocktail** | 模型融合 | 加权参数融合 | 灾难性遗忘 | 零样本适应 |
+| **LLM-Embedder** | 专用嵌入 | 6种检索场景统一 | LLM增强 | 多场景覆盖 |
+| **Activation-Beacon** | 长上下文 | 激活压缩 | 400K上下文 | 高效低内存 |
+| **BGE-VL** | 多模态 | MegaPairs数据 | 图像-文本 | 通用多模态 |
+| **BGE-Code** | 代码检索 | 代码专用 | 代码检索 | CoIR SOTA |
+
+### 技术演进路线图
+
+```mermaid
+timeline
+    title FlagEmbedding 研究演进路线
+    
+    section 基础阶段
+        BGE v1.0 : 基础嵌入模型
+        BGE v1.5 : 性能优化
+        Reranker v1 : 交叉编码重排
+    
+    section 多功能扩展
+        BGE-M3 : 多功能统一
+        MRL : 嵌套维度
+        LM-Cocktail : 模型融合
+    
+    section 长上下文
+        LLM-Embedder : LLM优化
+        Activation-Beacon : 400K上下文
+        LongLLM-QLoRA : 80K上下文
+    
+    section 专用领域
+        BGE-Code : 代码检索
+        BGE-VL : 多模态检索
+        LLM-Reranker : LLM重排
+```
+
+---
+
 ## 目录
 
 1. [BGE-M3：重点分析](#bge-m3重点分析)

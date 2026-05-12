@@ -1,6 +1,135 @@
 # FlagEmbedding 核心算法详解
 
-本文档详细分析 FlagEmbedding 框架中的核心算法实现，包括嵌入表示、对比学习、负样本策略、知识蒸馏、MRL、ColBERT 和稀疏检索等核心技术。
+## 模块架构总览
+
+```mermaid
+flowchart TB
+    subgraph 嵌入层["嵌入表示算法"]
+        CLS[CLS Pooling]
+        MEAN[Mean Pooling]
+        LAST[Last Token Pooling]
+        NORM[归一化]
+    end
+    
+    subgraph 对比学习["对比学习机制"]
+        CEL[CrossEntropy Loss]
+        SIM[相似度计算<br/>点积+温度系数]
+    end
+    
+    subgraph 负采样["负样本策略"]
+        INB[批内负样本]
+        CROSS[跨设备负样本]
+        NO_INB[无批内负样本]
+    end
+    
+    subgraph 蒸馏["知识蒸馏"]
+        KL[KL散度]
+        M3KD[M3专用蒸馏]
+    end
+    
+    subgraph 多表示["多粒度表示"]
+        DENSE[Dense向量]
+        SPARSE[Sparse向量]
+        COLBERT[ColBERT多向量]
+    end
+    
+    subgraph MRL["MRL嵌套学习"]
+        D64[dim=64]
+        D128[dim=128]
+        D256[dim=256]
+        D768[dim=768]
+    end
+    
+    CLS --> NORM
+    MEAN --> NORM
+    LAST --> NORM
+    
+    NORM --> CEL
+    INB --> CEL
+    CROSS --> CEL
+    NO_INB --> CEL
+    
+    CEL --> SIM
+    KL --> SIM
+    M3KD --> SIM
+    
+    DENSE --> SPARSE
+    SPARSE --> COLBERT
+    
+    D768 --> D256
+    D256 --> D128
+    D128 --> D64
+```
+
+### 核心算法对比表
+
+| 算法 | 类别 | 输入处理 | 输出形式 | 适用场景 | 优势 |
+|------|------|---------|---------|---------|------|
+| **CLS Pooling** | Pooling | last_hidden_state[:,0] | 向量 | 通用场景 | 简单高效 |
+| **Mean Pooling** | Pooling | 加权平均 | 向量 | 长文本 | 信息完整 |
+| **Last Token** | Pooling | 最后有效token | 向量 | Decoder模型 | 捕捉序列末尾 |
+| **批内负样本** | 负采样 | batch内样本 | 矩阵 | 大batch训练 | 负样本充足 |
+| **跨设备负样本** | 负采样 | 多GPU样本 | 矩阵 | 分布式训练 | 负样本更多 |
+| **KL蒸馏** | 蒸馏 | teacher_scores | 概率分布 | 通用蒸馏 | 稳定可靠 |
+| **M3蒸馏** | 蒸馏 | 多粒度分数 | 加权损失 | M3模型 | 精细化 |
+| **Dense** | 表示 | pooling向量 | 稠密向量 | 语义匹配 | 语义理解强 |
+| **Sparse** | 表示 | 词汇权重 | 稀疏向量 | 词汇匹配 | 精确匹配 |
+| **ColBERT** | 表示 | token向量 | 多向量 | 细粒度匹配 | 局部语义 |
+
+### BGE-M3 三表示融合流程
+
+```mermaid
+flowchart LR
+    subgraph 输入["文本输入"]
+        Query[Query查询]
+        Doc[Document文档]
+    end
+    
+    subgraph 编码["统一编码"]
+        BERT[Encoder Model]
+        HS[Hidden States]
+    end
+    
+    subgraph 三路["三路表示"]
+        direction TB
+        Dense[Dense: CLS Pooling<br/>语义向量]
+        Sparse[Sparse: 词汇权重<br/>稀疏向量]
+        ColBERT[ColBERT: Token向量<br/>多向量]
+    end
+    
+    subgraph 打分["融合打分"]
+        DS[Dense Score]
+        SS[Sparse Score]
+        CS[ColBERT Score]
+        Ensemble[加权融合]
+    end
+    
+    subgraph 输出["输出"]
+        Final[最终分数]
+    end
+    
+    Query --> BERT
+    Doc --> BERT
+    BERT --> HS
+    
+    HS --> Dense
+    HS --> Sparse
+    HS --> ColBERT
+    
+    Dense --> DS
+    Sparse --> SS
+    ColBERT --> CS
+    
+    DS --> Ensemble
+    SS --> Ensemble
+    CS --> Ensemble
+    
+    Ensemble --> Final
+```
+
+---
+
+本文档详细分析 FlagEmbedding 框架中的核心算法实现,包括嵌入表示、对比学习、负样本策略、知识蒸馏、MRL、ColBERT 和稀疏检索等核心技术。
 
 ## 1. 嵌入表示算法
 

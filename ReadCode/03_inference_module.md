@@ -1,5 +1,99 @@
 # FlagEmbedding 推理模块深度分析
 
+## 模块架构总览
+
+```mermaid
+flowchart LR
+    subgraph 输入["输入层"]
+        Q[Query查询]
+        P[Passage文档]
+    end
+    
+    subgraph 加载["自动模型加载"]
+        FAM[FlagAutoModel]
+        FAR[FlagAutoReranker]
+        MAP[model_mapping.py]
+    end
+    
+    subgraph Embedder["Embedder实现"]
+        BE[BaseEmbedder]
+        M3E[M3Embedder]
+        LLE[BaseLLMEmbedder]
+        ICLE[ICLLLMEmbedder]
+    end
+    
+    subgraph Reranker["Reranker实现"]
+        BR[BaseReranker]
+        LLR[LayerWiseLLMReranker]
+        LWR[LightweightLLMReranker]
+    end
+    
+    subgraph 抽象["抽象基类"]
+        AbsE[AbsEmbedder]
+        AbsR[AbsReranker]
+    end
+    
+    FAM --> BE
+    FAM --> M3E
+    FAM --> LLE
+    FAM --> ICLE
+    FAR --> BR
+    FAR --> LLR
+    FAR --> LWR
+    
+    BE --> AbsE
+    M3E --> AbsE
+    LLE --> AbsE
+    BR --> AbsR
+    LLR --> AbsR
+    LWR --> AbsR
+    
+    MAP -.-> FAM
+    MAP -.-> FAR
+```
+
+### 推理流程时序图
+
+```mermaid
+sequenceDiagram
+    participant User as 用户
+    participant FAM as FlagAutoModel
+    participant AbsE as AbsEmbedder
+    participant Impl as 具体实现
+    
+    User->>FAM: from_finetuned(model_name)
+    FAM->>FAM: 查询model_mapping
+    FAM->>Impl: 创建实例(BaseEmbedder/M3Embedder)
+    Impl->>AbsE: __init__()
+    AbsE->>Impl: 返回实例
+    
+    User->>FAM: encode(sentences)
+    FAM->>AbsE: encode()
+    AbsE->>Impl: encode_single_device()
+    Impl->>Impl: 1. Tokenize
+    Impl->>Impl: 2. 按长度排序
+    Impl->>Impl: 3. Batch推理
+    Impl->>Impl: 4. Pooling
+    Impl->>Impl: 5. 归一化
+    Impl-->>AbsE: embeddings
+    AbsE-->>User: 返回结果
+```
+
+### 核心组件速查表
+
+| 组件 | 类型 | 适用场景 | 关键特性 |
+|------|------|---------|---------|
+| **FlagAutoModel** | 自动加载器 | 通用 Embedder | 自动类选择、参数推断 |
+| **FlagAutoReranker** | 自动加载器 | 通用 Reranker | 自动类选择 |
+| **BaseEmbedder** | Encoder-only | BERT类模型 | CLS/Mean Pooling |
+| **M3Embedder** | Encoder-only | BGE-M3 | 多粒度输出 |
+| **BaseLLMEmbedder** | Decoder-only | LLM模型 | Last Token Pooling |
+| **ICLLLMEmbedder** | Decoder-only | Few-shot场景 | 前缀拼接 |
+| **BaseReranker** | Encoder-only | Cross-Encoder | 序列分类 |
+| **LayerWiseLLMReranker** | Decoder-only | LLM重排 | 多层输出融合 |
+
+---
+
 本分析文档深入研究 FlagEmbedding 项目的推理模块（`inference`），包括自动模型加载、Embedder 和 Reranker 的实现细节。
 
 ## 目录

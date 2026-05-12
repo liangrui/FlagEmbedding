@@ -1,5 +1,90 @@
 # FlagEmbedding 抽象基层 (ABC Layer) 深度分析
 
+## 模块架构总览
+
+```mermaid
+classDiagram
+    class AbsEmbedder {
+        <<abstract>>
+        +encode_queries()
+        +encode_corpus()
+        +encode()
+        +encode_single_device()*
+        +start_multi_process_pool()
+        +encode_multi_process()
+    }
+    
+    class AbsReranker {
+        <<abstract>>
+        +compute_score()
+        +compute_score_single_gpu()*
+        +start_multi_process_pool()
+        +get_detailed_inputs()
+    }
+    
+    class AbsEmbedderModel {
+        <<abstract>>
+        +encode()*
+        +compute_loss()*
+        +compute_score()*
+        +forward()
+        +_compute_in_batch_neg_loss()
+        +_compute_cross_device_neg_loss()
+        +distill_loss()
+    }
+    
+    class AbsRerankerModel {
+        <<abstract>>
+        +encode()*
+        +forward()
+        +compute_loss()
+    }
+    
+    class AbsEvalRunner {
+        <<abstract>>
+        +get_models()
+        +load_retriever_and_reranker()*
+        +run()
+    }
+    
+    class AbsEvaluator {
+        +__call__()
+        +evaluate_results()
+        +save_search_results()
+    }
+    
+    class EvalRetriever {
+        <<abstract>>
+        +__call__()*
+    }
+    
+    class EvalReranker {
+        +__call__()
+    }
+    
+    AbsEmbedder <|-- BaseEmbedder
+    AbsEmbedder <|-- M3Embedder
+    AbsReranker <|-- BaseReranker
+    AbsEmbedderModel <|-- BiEncoderOnlyEmbedderModel
+    AbsEmbedderModel <|-- EncoderOnlyEmbedderM3Model
+    AbsRerankerModel <|-- CrossEncoderModel
+    AbsEvalRunner <|.. BEIREvalRunner
+    EvalRetriever <|-- EvalDenseRetriever
+```
+
+### 核心组件速查表
+
+| 组件 | 职责 | 关键方法 | 实现文件 |
+|------|------|---------|---------|
+| **AbsEmbedder** | 嵌入模型抽象 | encode/encode_queries/encode_corpus | abc/inference/AbsEmbedder.py |
+| **AbsReranker** | 重排序模型抽象 | compute_score | abc/inference/AbsReranker.py |
+| **AbsEmbedderModel** | 训练模型抽象 | forward/loss 计算 | abc/finetune/embedder/AbsModeling.py |
+| **AbsRerankerModel** | 重排序训练抽象 | forward | abc/finetune/reranker/AbsModeling.py |
+| **AbsEvalRunner** | 评估运行器 | run | abc/evaluation/runner.py |
+| **AbsEvaluator** | 评估执行器 | __call__ | abc/evaluation/evaluator.py |
+
+---
+
 ## 目录
 
 - [1. 概述](#1-概述)

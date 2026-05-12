@@ -1,5 +1,77 @@
 # FlagEmbedding 项目概述
 
+## 项目架构总览
+
+本文档为 FlagEmbedding (BGE) 项目提供整体架构概览、核心设计理念和快速入门指南。
+
+```mermaid
+flowchart TB
+    subgraph 用户层["用户接口层"]
+        User[用户代码]
+    end
+    
+    subgraph 自动加载层["自动模型加载"]
+        FAM[FlagAutoModel]
+        FAR[FlagAutoReranker]
+    end
+    
+    subgraph 核心模块["核心功能模块"]
+        subgraph 推理模块["推理模块 inference/"]
+            BE[BaseEmbedder]
+            M3E[M3Embedder]
+            BR[BaseReranker]
+            LLR[LayerWiseLLMReranker]
+        end
+        
+        subgraph 微调模块["微调模块 finetune/"]
+            FT_E[Embedder微调]
+            FT_R[Reranker微调]
+        end
+        
+        subgraph 评估模块["评估模块 evaluation/"]
+            EVAL[MTEB/BEIR/MSMARCO/...]
+        end
+    end
+    
+    subgraph 抽象基类层["抽象基类层 abc/"]
+        AbsE[AbsEmbedder]
+        AbsR[AbsReranker]
+        AbsM[AbsModeling]
+        AbsD[AbsDataset]
+        AbsT[AbsTrainer]
+        AbsEval[评估抽象类]
+    end
+    
+    User --> FAM
+    User --> FAR
+    FAM --> BE
+    FAM --> M3E
+    FAR --> BR
+    FAR --> LLR
+    BE --> AbsE
+    M3E --> AbsE
+    BR --> AbsR
+    LLR --> AbsR
+    FT_E --> AbsM
+    FT_E --> AbsD
+    FT_E --> AbsT
+    FT_R --> AbsM
+    EVAL --> AbsEval
+```
+
+### 文档导航
+
+| 章节 | 内容说明 | 适用对象 |
+|------|---------|---------|
+| [1. 项目背景](#1-项目背景与定位) | 项目起源、定位与核心价值 | 初次接触项目 |
+| [2. 设计理念](#2-设计理念与架构思想) | 架构思想、设计模式 | 架构师、开发者 |
+| [3. 目录结构](#3-目录结构说明) | 核心目录与职责划分 | 所有用户 |
+| [4. 功能模型](#4-主要功能与模型列表) | 支持的模型与功能列表 | 算法工程师 |
+| [5. 快速开始](#5-快速开始示例) | 基础使用代码示例 | 开发者 |
+| [6. 核心特性](#6-核心特性总结) | 项目亮点总结 | 所有用户 |
+
+---
+
 ## 1. 项目背景与定位
 
 ### 1.1 什么是 FlagEmbedding
