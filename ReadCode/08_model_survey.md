@@ -117,6 +117,15 @@ mindmap
 
 ### BGE 系列模型
 
+🎯 **核心定位：** 全能型，完整生态系统
+
+**差异化亮点：**
+- ✅ **唯一支持三功能融合**（dense + sparse + ColBERT）
+- ✅ **最长文本支持**（8192 token）
+- ✅ **最多语言覆盖**（100+）
+- ✅ **完整微调工具链**
+- ✅ **中国本土研发，社区活跃**
+
 BGE（BAAI General Embedding）系列是 FlagEmbedding 的核心模型，由北京智源人工智能研究院自主研发。
 
 #### BGE v1.0 系列
@@ -253,6 +262,15 @@ embeddings = model.encode(['文本内容'], return_dense=True, return_sparse=Tru
 
 ### Qwen3-Embedding 系列
 
+🎯 **核心定位：** 通义千问原生，中文优化
+
+**差异化亮点：**
+- ✅ **Decoder-only 架构**（与其他 Encoder-only 不同）
+- ✅ **大模型原生对齐**（Qwen3 系列）
+- ✅ **超丰富规模选择**（0.6B/4B/8B）
+- ✅ **阿里云生态深度集成**
+- ✅ **中文理解优势明显**
+
 Qwen3-Embedding 是通义千问 Qwen3 系列的嵌入模型。
 
 | 模型名称 | 参数量 | 架构 | Pooling |
@@ -277,6 +295,15 @@ Qwen3-Embedding 是通义千问 Qwen3 系列的嵌入模型。
 ---
 
 ### E5 系列模型
+
+🎯 **核心定位：** 经典稳定，广泛验证
+
+**差异化亮点：**
+- ✅ **Mean pooling 设计**（与 BGE 的 CLS pooling 不同）
+- ✅ **微软背书，成熟度高**
+- ✅ **早期标杆模型，大量文献引用**
+- ✅ **稳定性和兼容性好**
+- ✅ **多语言版本成熟**
 
 E5（Embedding v5）系列是 Microsoft 开发的嵌入模型。
 
@@ -323,6 +350,15 @@ E5（Embedding v5）系列是 Microsoft 开发的嵌入模型。
 ---
 
 ### GTE 系列模型
+
+🎯 **核心定位：** 电商优化，中英混合
+
+**差异化亮点：**
+- ✅ **阿里生态深度集成
+- ✅ **电商领域特别优化
+- ✅ **中英文混合场景最佳
+- ✅ **GTE-Qwen 系列支持大模型
+- ✅ **Mean + CLS 双策略混合
 
 GTE（General Text Embedding）系列是阿里巴巴开发的嵌入模型。
 
@@ -571,7 +607,64 @@ scores = reranker.compute_score([
 
 ---
 
-## 模型分类与对比
+## 🚀 各模型系统差异化核心对比
+
+### 🔥 各模型系列独特卖点（USP）
+
+| 模型系列 | 开发机构 | **独特优势** | **最大亮点** | **核心差异** |
+|---------|---------|-------------|------------|-----------|
+| **BGE** | BAAI | 多功能、多语言、完整工具链 | **bge-m3 的三功能融合** | 中国本土开发，完整生态系统 |
+| **Qwen3** | 阿里巴巴 | 通义千问原生，中文优化 | **Decoder-only 架构 + 多种规模** | 通义千问生态，中文专注 |
+| **E5** | Microsoft | 经典稳定，广泛使用 | **Mean pooling 设计** | 微软背书，成熟度高 |
+| **GTE** | 阿里巴巴 | 中英文混合，电商优化 | **阿里云生态集成** | 电商领域特别优化 |
+| **SFR** | Salesforce | 企业级优化 | **Salesforce 生态** | 企业应用集成优势 |
+| **Linq** | Linq | 特定领域 | **生态整合** | 特定领域优化 |
+| **BCE** | 百度 | 百度生态 | **中文检索** | 百度技术栈整合 |
+
+```mermaid
+mindmap
+  root((差异化对比))
+    BGE 系列
+      三功能融合
+      多语言 100+
+      长文本 8192
+      完整工具链
+    Qwen3
+      Decoder-only
+      通义千问原生
+      多种规模选择
+      中文优化
+    E5 系列
+      微软经典
+      Mean pooling
+      多语言支持
+    GTE 系列
+      阿里生态
+      电商优化
+      中英文混合
+    SFR/Linq
+      企业级
+      Salesforce/Linq生态
+    BCE
+      百度生态
+      中文专注
+```
+
+### 🎯 架构设计差异化对比
+
+| 维度 | **BGE 系列** | **Qwen3** | **E5** | **GTE** |
+|-----|-------------|-----------|-------|-------|
+| **主要架构** | Encoder-only 为主 | Decoder-only | Encoder-only | 混合架构 |
+| **Pooling 策略** | CLS | Last Token | Mean | CLS/Mean |
+| **多功能支持** | ✅ 三功能（bge-m3） | ❌ | ❌ | ❌ |
+| **长文本支持** | 8192（bge-m3） | 标准 | 标准 | 标准 |
+| **模型规模** | Small/Base/Large | 0.6B/4B/8B | Small/Base/Large | Small/Base/Large/7B |
+| **语言重点** | 中英为主 + 100+ | 中文 | 英文为主 | 中英 + 多语言 |
+| **技术特色** | 对比学习优化 | 大模型对齐 | 渐进式优化 | 领域适配 |
+
+---
+
+## 📊 模型分类与对比
 
 ### 按架构分类
 
@@ -613,6 +706,46 @@ flowchart LR
 | 多语言 | bge-m3, bge-multilingual-gemma2 | 支持多语言 |
 | 长文本 | bge-m3 (8192) | 支持长输入 |
 
+### 🔍 使用场景对比决策表
+
+| 场景 | **首选模型** | **次选模型** | **原因分析** |
+|-----|------------|------------|-----------|
+| 多语言混合检索 | **bge-m3** | multilingual-e5-large | BGE-M3 支持100+语言，三功能融合 |
+| 纯英文高精度检索 | bge-large-en-v1.5 | e5-large-v2 | BGE v1.5 在英文榜单领先 |
+| 纯中文检索 | bge-large-zh-v1.5 | gte-large-zh | BGE v1.5 中文优化，Qwen3 备选 |
+| 电商领域应用 | gte-large-zh | bge-m3 | GTE 电商优化，中英文混合 |
+| 企业级Salesforce集成 | SFR-Embedding-Mistral | - | 原生生态支持 |
+| 资源受限部署 | Qwen3-Embedding-0.6B | bge-small-*-v1.5 | 0.6B超轻量，性能优秀 |
+| 长文档处理 | bge-m3 | - | 支持8192超长输入 |
+| 代码检索 | bge-code-v1 | - | 代码专用模型 |
+| 需要上下文学习 | bge-en-icl | - | ICL支持 |
+
+```mermaid
+flowchart TD
+    A[开始选择模型] --> B{是否需要多语言?}
+    B -->|是| C[bge-m3]
+    B -->|否| D{主要语言是?}
+    
+    D -->|英文| E{资源是否受限?}
+    D -->|中文| F{资源是否受限?}
+    D -->|混合| G{gte系列}
+    
+    E -->|受限| H[bge-small-en-v1.5]
+    E -->|不受限| I[bge-large-en-v1.5]
+    
+    F -->|受限| J[Qwen3-Embedding-0.6B]
+    F -->|不受限| K[bge-large-zh-v1.5]
+    
+    G --> L{是否电商领域?}
+    L -->|是| M[gte-large-zh]
+    L -->|否| N[bge-m3]
+    
+    style C fill:#ffcc80
+    style I fill:#ffcc80
+    style K fill:#ffcc80
+    style M fill:#ffcc80
+```
+
 ### 性能对比表
 
 #### 嵌入模型性能对比
@@ -653,9 +786,54 @@ flowchart LR
 
 **配置文件：** [FlagEmbedding/inference/embedder/model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py#L27-L39)
 
+### 💡 各模型系统设计理念差异
+
+| 模型系列 | **设计理念** | **优化重点** | **技术路线** | **权衡取舍** |
+|---------|-------------|------------|-----------|------------|
+| **BGE** | **多功能 + 全生态** | 检索效果 + 工具完善 | Encoder-only为主，对比学习 | 功能丰富度 > 极致单场景性能 |
+| **Qwen3** | **大模型原生对齐** | 中文理解 + 生态集成 | Decoder-only，大模型技术路线 | 大模型优势 > 极致轻量化 |
+| **E5** | **经典稳健** | 稳定性 + 兼容性 | Mean pooling，渐进优化 | 成熟稳定 > 前沿功能 |
+| **GTE** | **垂直领域优化** | 电商 + 中英文 | 混合架构，领域适配 | 领域适配 > 通用能力 |
+| **SFR/Linq** | **企业集成** | 生态适配 + 企业级 | Decoder-only，企业定制 | 生态整合 > 广泛通用性 |
+| **BCE** | **百度生态** | 中文 + 百度栈 | Encoder-only，百度技术路线 | 生态整合 > 多平台适应 |
+
+### 📈 各模型技术路线对比图
+
+```mermaid
+flowchart LR
+    A[技术路线选择] --> B[Encoder-only 路线]
+    A --> C[Decoder-only 路线]
+    
+    B --> B1[BGE系列]
+    B --> B2[E5系列]
+    B --> B3[GTE基础版]
+    B --> B4[BCE]
+    
+    C --> C1[Qwen3系列]
+    C --> C2[bge-code-v1]
+    C --> C3[bge-en-icl]
+    C --> C4[SFR系列]
+    
+    style B1 fill:#ffcccc
+    style B2 fill:#ccffcc
+    style C1 fill:#ccccff
+    
+    note over B
+        CLS/Mean pooling
+        计算高效
+        成熟稳定
+    end
+    
+    note over C
+        Last token pooling
+        大模型技术
+        生态整合好
+    end
+```
+
 ---
 
-## 模型选择指南
+## 🎯 模型选择指南
 
 ### 根据场景选择模型
 
@@ -806,6 +984,53 @@ colbert_scores = compute_colbert_similarity(colbert_vecs, query_colbert_vecs)
 # 4. 混合打分
 final_scores = 0.6 * dense_scores + 0.2 * sparse_scores + 0.2 * colbert_scores
 ```
+
+### 📌 核心差异化总结卡片
+
+```mermaid
+mindmap
+  root((核心差异化核心差异))
+    技术路线
+      Encoder-only
+        CLS pooling
+          BGE/GTE/E5/BCE
+        Mean pooling
+          E5/GTE
+      Decoder-only
+        Last token
+          Qwen3/SFR
+        大模型技术
+    功能差异
+      单功能
+        BGE-v1.5/E5/GTE
+      多功能
+        BGE-M3 (3功能
+    语言聚焦
+      英文为主
+        E5/SFR
+      中文为主
+        BGE-zh/Qwen3
+      多语言
+        BGE-M3
+    生态整合
+      完整工具链
+        BGE
+      大模型生态
+        Qwen3/GTE
+      企业生态
+        SFR/Linq
+      百度生态
+        BCE
+```
+
+| **一句话总结各系统核心差异：**
+
+- **BGE**：**最全能选手**，**唯一支持三功能融合、100+语言、完整工具链
+- **Qwen3**：**大模型原生**，Decoder-only架构、通义千问生态、中文优化
+- **E5**：**经典稳定派**，微软背书、Mean pooling、成熟稳定
+- **GTE**：**领域优化**，阿里生态、电商优化、中英文混合
+- **SFR/Linq**：**企业级**，生态整合、Salesforce/Linq生态
+- **BCE**：**百度系**，中文、百度生态
 
 ---
 
