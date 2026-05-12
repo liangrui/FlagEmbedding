@@ -129,6 +129,26 @@ BGE（BAAI General Embedding）是 FlagEmbedding 的核心产品线，提供了�
 
 #### 1.1.1 BGE v1.0 系列
 
+```mermaid
+flowchart TD
+    A[文本输入 Text] --> B[Tokenizer]
+    B --> C[BERT Encoder]
+    C --> D[CLS Token Output]
+    D --> E[Pooling]
+    E --> F[Embedding Output]
+    
+    subgraph 规模选择
+        G[Small 小模型]
+        H[Base 中模型]
+        I[Large 大模型]
+    end
+    
+    G & H & I -.-> C
+    
+    style C fill:#e3f2fd
+    style D fill:#fff3e0
+```
+
 | 模型名称 | 规模 | 语言 | Pooling |
 |---------|------|------|---------|
 | `bge-large-en` | Large | 英文 | CLS |
@@ -146,6 +166,26 @@ BGE（BAAI General Embedding）是 FlagEmbedding 的核心产品线，提供了�
 
 #### 1.1.2 BGE v1.5 系列
 
+```mermaid
+flowchart TD
+    A[文本输入 Text] --> B[优化 Tokenizer]
+    B --> C[增强 BERT Encoder]
+    C --> D[CLS Token Output]
+    D --> E[改进 Pooling]
+    E --> F[归一化 Normalization]
+    F --> G[Embedding Output]
+    
+    note over C
+        v1.5 改进：
+        - 更好的预训练
+        - 优化的数据
+        - 更强的泛化
+    end
+    
+    style C fill:#e1bee7
+    style D fill:#fff8e1
+```
+
 | 模型名称 | 规模 | 语言 | Pooling |
 |---------|------|------|---------|
 | `bge-large-en-v1.5` | Large | 英文 | CLS |
@@ -162,6 +202,37 @@ BGE（BAAI General Embedding）是 FlagEmbedding 的核心产品线，提供了�
 - 推荐用于生产环境
 
 #### 1.1.3 BGE-M3 模型
+
+```mermaid
+flowchart TD
+    A[文本输入 Text] --> B[Tokenizer]
+    B --> C[BERT Encoder]
+    
+    C --> D[Dense 密集表示]
+    C --> E[Sparse 稀疏表示]
+    C --> F[ColBERT Token表示]
+    
+    D --> G[CLS Pooling]
+    E --> H[词汇权重计算]
+    F --> I[Multi-Vector]
+    
+    G --> J[语义匹配]
+    H --> K[精确匹配]
+    I --> L[细粒度匹配]
+    
+    J & K & L --> M[融合匹配 Fusion]
+    
+    note over D,E,F
+        多功能：Dense + Sparse + ColBERT
+        多语言：100+ 语言支持
+        多粒度：支持长文本
+    end
+    
+    style C fill:#ffe0b2
+    style D fill:#c8e6c9
+    style E fill:#bbdefb
+    style F fill:#f8bbd9
+```
 
 `bge-m3` 是 BGE 系列的旗舰产品，具有以下特色：
 
@@ -194,6 +265,32 @@ BGE（BAAI General Embedding）是 FlagEmbedding 的核心产品线，提供了�
 
 ### 1.2 Qwen3-Embedding 系列
 
+```mermaid
+flowchart TD
+    A[查询 Instruct + Query] --> B[Tokenizer]
+    B --> C[Qwen3 Decoder]
+    
+    C --> D[Hidden States]
+    D --> E[Last Token]
+    E --> F[Embedding Output]
+    
+    subgraph 规模选项
+        G[0.6B 小模型]
+        H[4B 中模型]
+        I[8B 大模型]
+    end
+    
+    G & H & I -.-> C
+    
+    note over A,E
+        查询格式:
+        Instruct: {task}\nQuery: {text}
+    end
+    
+    style C fill:#e1bee7
+    style E fill:#b2ebf2
+```
+
 | 模型名称 | 参数量 | Pooling |
 |---------|--------|---------|
 | `Qwen3-Embedding-0.6B` | 0.6B | Last Token |
@@ -212,6 +309,26 @@ BGE（BAAI General Embedding）是 FlagEmbedding 的核心产品线，提供了�
 
 #### 1.3.1 基础 E5 模型
 
+```mermaid
+flowchart TD
+    A[文本输入 Text] --> B[Tokenizer]
+    B --> C[BERT Encoder]
+    C --> D[所有 Token Hidden States]
+    D --> E[Mean Pooling 平均池化]
+    E --> F[Embedding Output]
+    
+    subgraph 规模选择
+        G[Small 小模型]
+        H[Base 中模型]
+        I[Large 大模型]
+    end
+    
+    G & H & I -.-> C
+    
+    style C fill:#c8e6c9
+    style E fill:#fff9c4
+```
+
 | 模型名称 | 规模 | Pooling |
 |---------|------|---------|
 | `e5-large` | Large | Mean |
@@ -219,6 +336,26 @@ BGE（BAAI General Embedding）是 FlagEmbedding 的核心产品线，提供了�
 | `e5-small` | Small | Mean |
 
 #### 1.3.2 E5 v2 模型
+
+```mermaid
+flowchart TD
+    A[文本输入 Text] --> B[改进 Tokenizer]
+    B --> C[增强 Encoder v2]
+    C --> D[所有 Token Hidden States]
+    D --> E[优化 Mean Pooling]
+    E --> F[归一化]
+    F --> G[Embedding Output]
+    
+    note over C
+        v2 改进:
+        - 更好的预训练
+        - 优化的数据
+        - 更强的检索性能
+    end
+    
+    style C fill:#b3e5fc
+    style E fill:#fff3e0
+```
 
 | 模型名称 | 规模 | Pooling |
 |---------|------|---------|
@@ -228,6 +365,28 @@ BGE（BAAI General Embedding）是 FlagEmbedding 的核心产品线，提供了�
 
 #### 1.3.3 多语言 E5 系列
 
+```mermaid
+flowchart TD
+    A[多语言文本 Multilingual] --> B[多语言 Tokenizer]
+    B --> C[Multilingual BERT]
+    C --> D[所有 Token Hidden States]
+    D --> E[Mean Pooling]
+    E --> F[Embedding Output]
+    
+    subgraph 指令版本
+        G[Instruct 指令输入] --> H[指令格式化]
+        H --> A
+    end
+    
+    note over C
+        支持语言: 100+
+        特点: 跨语言检索
+    end
+    
+    style C fill:#ffcc80
+    style E fill:#f0f4c3
+```
+
 | 模型名称 | 特点 | Pooling |
 |---------|------|---------|
 | `multilingual-e5-large` | 大参数量 | Mean |
@@ -236,6 +395,24 @@ BGE（BAAI General Embedding）是 FlagEmbedding 的核心产品线，提供了�
 | `multilingual-e5-large-instruct` | 带指令支持 | Mean |
 
 #### 1.3.4 E5-Mistral
+
+```mermaid
+flowchart TD
+    A[指令 + 文本 Instruct+Text] --> B[Tokenizer]
+    B --> C[Mistral 7B Decoder]
+    C --> D[Hidden States]
+    D --> E[Last Token Pooling]
+    E --> F[Embedding Output]
+    
+    note over A,E
+        基于 Mistral 7B
+        支持指令格式
+        更强的语义理解
+    end
+    
+    style C fill:#e1bee7
+    style E fill:#b2ebf2
+```
 
 | 模型名称 | 特点 |
 |---------|------|
@@ -253,6 +430,26 @@ BGE（BAAI General Embedding）是 FlagEmbedding 的核心产品线，提供了�
 
 #### 1.4.1 基础 GTE 模型
 
+```mermaid
+flowchart TD
+    A[文本输入 Text] --> B[Tokenizer]
+    B --> C[GTE BERT Encoder]
+    C --> D[所有 Token Hidden States]
+    D --> E[Mean Pooling 平均池化]
+    E --> F[Embedding Output]
+    
+    subgraph 规模选择
+        G[Small 小模型]
+        H[Base 中模型]
+        I[Large 大模型]
+    end
+    
+    G & H & I -.-> C
+    
+    style C fill:#c8e6c9
+    style E fill:#fff9c4
+```
+
 | 模型名称 | 规模 | Pooling |
 |---------|------|---------|
 | `gte-large` | Large | Mean |
@@ -261,12 +458,57 @@ BGE（BAAI General Embedding）是 FlagEmbedding 的核心产品线，提供了�
 
 #### 1.4.2 GTE v1.5 模型
 
+```mermaid
+flowchart TD
+    A[英文文本 English] --> B[优化 Tokenizer]
+    B --> C[GTE v1.5 Encoder]
+    C --> D[CLS Token]
+    D --> E[Pooling]
+    E --> F[归一化]
+    F --> G[Embedding Output]
+    
+    note over C
+        v1.5 改进:
+        - 英文专项优化
+        - CLS Pooling
+        - 更好的检索性能
+    end
+    
+    style C fill:#b3e5fc
+    style D fill:#fff3e0
+```
+
 | 模型名称 | 规模 | Pooling |
 |---------|------|---------|
 | `gte-large-en-v1.5` | Large | CLS |
 | `gte-base-en-v1.5` | Base | CLS |
 
 #### 1.4.3 中文 GTE 系列
+
+```mermaid
+flowchart TD
+    A[中文文本 Chinese] --> B[中文 Tokenizer]
+    B --> C[Chinese GTE Encoder]
+    C --> D[CLS Token]
+    D --> E[CLS Pooling]
+    E --> F[Embedding Output]
+    
+    subgraph 规模选择
+        G[Small 小模型]
+        H[Base 中模型]
+        I[Large 大模型]
+    end
+    
+    G & H & I -.-> C
+    
+    note over C
+        特点: 中文专项优化
+        使用 CLS Pooling
+    end
+    
+    style C fill:#ffcc80
+    style D fill:#f0f4c3
+```
 
 | 模型名称 | 规模 | Pooling |
 |---------|------|---------|
@@ -276,6 +518,31 @@ BGE（BAAI General Embedding）是 FlagEmbedding 的核心产品线，提供了�
 
 #### 1.4.4 GTE-Qwen 系列
 
+```mermaid
+flowchart TD
+    A[Instruct + Query] --> B[Tokenizer]
+    B --> C[Qwen Decoder]
+    C --> D[Hidden States]
+    D --> E[Last Token Pooling]
+    E --> F[Embedding Output]
+    
+    subgraph 规模选项
+        G[Qwen1.5 7B]
+        H[Qwen2 1.5B]
+        I[Qwen2 7B]
+    end
+    
+    G & H & I -.-> C
+    
+    note over A,E
+        支持指令格式
+        基于 Qwen 系列模型
+    end
+    
+    style C fill:#e1bee7
+    style E fill:#b2ebf2
+```
+
 | 模型名称 | 特点 |
 |---------|------|
 | `gte-Qwen2-7B-instruct` | Qwen2 7B，指令支持 |
@@ -283,6 +550,23 @@ BGE（BAAI General Embedding）是 FlagEmbedding 的核心产品线，提供了�
 | `gte-Qwen1.5-7B-instruct` | Qwen1.5 7B，指令支持 |
 
 #### 1.4.5 多语言 GTE
+
+```mermaid
+flowchart TD
+    A[多语言文本 Multilingual] --> B[多语言 Tokenizer]
+    B --> C[Multilingual GTE Encoder]
+    C --> D[CLS Token]
+    D --> E[CLS Pooling]
+    E --> F[Embedding Output]
+    
+    note over C
+        特点: 多语言支持
+        需要 trust_remote_code
+    end
+    
+    style C fill:#c5cae9
+    style D fill:#fff8e1
+```
 
 | 模型名称 | 特点 |
 |---------|------|
