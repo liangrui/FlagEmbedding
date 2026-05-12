@@ -121,9 +121,56 @@ mindmap
 
 ---
 
-## 1. 嵌入模型综述
+### 1. 嵌入模型综述
 
-### 1.1 BGE 系列模型
+```mermaid
+flowchart LR
+    subgraph 嵌入模型系列
+        A[BGE 系列]
+        B[Qwen3-Embedding]
+        C[E5 系列]
+        D[GTE 系列]
+        E[SFR 系列]
+        F[Linq 系列]
+        G[BCE 系列]
+    end
+    
+    A -->|特点| A1[Encoder-only]
+    A -->|特点| A2[CLS Pooling]
+    A -->|特色| A3[BGE-M3 多功能]
+    
+    B -->|特点| B1[Decoder-only]
+    B -->|特点| B2[Last Token]
+    B -->|规模| B3[0.6B/4B/8B]
+    
+    C -->|特点| C1[Encoder-only]
+    C -->|特点| C2[Mean Pooling]
+    C -->|特色| C3[多语言支持]
+    
+    D -->|特点| D1[Encoder/Decoder]
+    D -->|特点| D2[Mean/CLS Pooling]
+    D -->|特色| D3[GTE-Qwen 大模型]
+    
+    E -->|特点| E1[Decoder-only]
+    E -->|特点| E2[Last Token]
+    E -->|特色| E3[Mistral 基础]
+    
+    F -->|特点| F1[Decoder-only]
+    F -->|特色| F2[Linq-Embed-Mistral]
+    
+    G -->|特点| G1[Encoder-only]
+    G -->|特点| G2[CLS Pooling]
+    
+    style A fill:#e3f2fd
+    style B fill:#e1bee7
+    style C fill:#c8e6c9
+    style D fill:#fff9c4
+    style E fill:#ffcc80
+    style F fill:#f0f4c3
+    style G fill:#c5cae9
+```
+
+#### 1.1 BGE 系列模型
 
 BGE（BAAI General Embedding）是 FlagEmbedding 的核心产品线，提供了丰富的中英文和多语言嵌入模型。
 
@@ -605,9 +652,36 @@ flowchart TD
 
 ---
 
-## 2. 重排序模型综述
+### 2. 重排序模型综述
 
-### 2.1 BGE 系列重排序器
+```mermaid
+flowchart LR
+    subgraph 重排序模型系列
+        A[BGE 系列]
+        B[Jina 系列]
+        C[GTE 多语言]
+        D[BCE 系列]
+    end
+    
+    A -->|特点| A1[Encoder/Decoder]
+    A -->|特色| A2[v2-M3/v2.5]
+    A -->|类型| A3[Base/Large/Layerwise/Lightweight]
+    
+    B -->|特点| B1[Encoder-only]
+    B -->|系列| B2[v1-turbo-en/v2-base-multilingual]
+    
+    C -->|特点| C1[Encoder-only]
+    C -->|特色| C2[多语言支持]
+    
+    D -->|特点| D1[Encoder-only]
+    
+    style A fill:#e3f2fd
+    style B fill:#c8e6c9
+    style C fill:#fff9c4
+    style D fill:#c5cae9
+```
+
+#### 2.1 BGE 系列重排序器
 
 | 模型名称 | 架构 | 特点 |
 |---------|------|------|
