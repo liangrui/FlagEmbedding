@@ -1,1055 +1,903 @@
-# FlagEmbedding 支持的嵌入及重排模型综述
+# FlagEmbedding 支持的嵌入与重排序模型综述
 
-## 摘要/简介
+本文档全面综述 FlagEmbedding 库支持的所有嵌入（Embedder）和重排序（Reranker）模型，包括模型特点、性能、适用场景以及完整的模型生态系统。
 
-FlagEmbedding 是由北京智源人工智能研究院（BAAI）开发的一站式检索工具库，为搜索和 RAG（检索增强生成）场景提供强大的嵌入（Embedder）和重排序（Reranker）模型支持。本文综述 FlagEmbedding 库当前支持的所有模型，包括它们的架构特点、性能表现、适用场景等，为用户选择合适的模型提供参考。
+## 目录
 
-## 模型生态思维图
+- [摘要与项目背景](#摘要与项目背景)
+- [模型生态系统思维图](#模型生态系统思维图)
+- [嵌入模型（Embedder）综述](#嵌入模型embedder综述)
+  - [BGE 系列模型](#bge-系列模型)
+  - [Qwen3-Embedding 系列](#qwen3-embedding-系列)
+  - [E5 系列模型](#e5-系列模型)
+  - [GTE 系列模型](#gte-系列模型)
+  - [SFR 系列模型](#sfr-系列模型)
+  - [Linq 模型](#linq-模型)
+  - [BCE 模型](#bce-模型)
+- [重排序模型（Reranker）综述](#重排序模型reranker综述)
+  - [BGE 系列重排序器](#bge-系列重排序器)
+  - [Jina 系列重排序器](#jina-系列重排序器)
+  - [GTE 系列重排序器](#gte-系列重排序器)
+  - [BCE 重排序器](#bce-重排序器)
+- [模型分类与对比](#模型分类与对比)
+- [模型选择指南](#模型选择指南)
+- [总结与展望](#总结与展望)
+
+---
+
+## 摘要与项目背景
+
+### FlagEmbedding 项目简介
+
+FlagEmbedding 是北京智源人工智能研究院（BAAI）开发的开源嵌入和重排序模型框架，专注于检索增强大语言模型（RAG）领域。该项目提供了一套完整的工具链，包括推理、微调、评估和数据集，支持多种架构的嵌入和重排序模型。
+
+**核心优势：**
+- 统一的 API 接口，支持多种主流模型
+- 完整的推理、微调和评估工具链
+- 多语言、多功能、多粒度的模型支持
+- 活跃的社区和持续的技术更新
+
+### 综述目标
+
+本综述旨在：
+1. 系统梳理 FlagEmbedding 支持的所有模型
+2. 分析各模型的特点、性能和适用场景
+3. 提供模型选择的最佳实践指南
+4. 展示完整的模型生态系统
+
+---
+
+## 模型生态系统思维图
 
 ```mermaid
 mindmap
   root((FlagEmbedding))
     嵌入模型(Embedder)
-      BGE系列
-        v1.0系列
-          bge-large-en
-          bge-base-en
-          bge-small-en
-          bge-large-zh
-          bge-base-zh
-          bge-small-zh
-        v1.5系列
-          bge-large-en-v1.5
-          bge-base-en-v1.5
-          bge-small-en-v1.5
-          bge-large-zh-v1.5
-          bge-base-zh-v1.5
-          bge-small-zh-v1.5
-        BGE-M3
-          多功能嵌入
-          多语言支持
+      BGE 系列
+        bge-m3
+        v1.5 系列
+        v1.0 系列
         专用模型
           bge-code-v1
-          bge-multilingual-gemma2
           bge-en-icl
-          bge-reasoner-embed-qwen3-8b-0923
+          bge-multilingual-gemma2
+          bge-reasoner-embed-qwen3-8b
       Qwen3-Embedding
         Qwen3-Embedding-0.6B
         Qwen3-Embedding-4B
         Qwen3-Embedding-8B
-      E5系列
-        基础E5
-          e5-large
-          e5-base
-          e5-small
+      E5 系列
+        E5 基础版
         E5 v2
-          e5-large-v2
-          e5-base-v2
-          e5-small-v2
-        多语言E5
-          multilingual-e5-large
-          multilingual-e5-base
-          multilingual-e5-small
-          multilingual-e5-large-instruct
-        e5-mistral-7b-instruct
-      GTE系列
-        基础GTE
-          gte-large
-          gte-base
-          gte-small
-        GTE v1.5
-          gte-large-en-v1.5
-          gte-base-en-v1.5
-        中文GTE
-          gte-large-zh
-          gte-base-zh
-          gte-small-zh
+        E5-Mistral-7B
+        Multilingual E5
+      GTE 系列
+        GTE 基础版
         GTE-Qwen
-          gte-Qwen2-7B-instruct
-          gte-Qwen2-1.5B-instruct
-          gte-Qwen1.5-7B-instruct
-        gte-multilingual-base
-      SFR系列
+        GTE v1.5
+        GTE 多语言
+      SFR 系列
         SFR-Embedding-Mistral
         SFR-Embedding-2_R
-      Linq
+      Linq 系列
         Linq-Embed-Mistral
-      BCE
+      BCE 系列
         bce-embedding-base_v1
     重排序模型(Reranker)
-      BGE系列
+      BGE 系列
         bge-reranker-base
         bge-reranker-large
         bge-reranker-v2-m3
         bge-reranker-v2-gemma
         bge-reranker-v2-minicpm-layerwise
         bge-reranker-v2.5-gemma2-lightweight
-      其他品牌
-        Jina系列
-          jina-reranker-v2-base-multilingual
-          jina-reranker-v1-turbo-en
-        GTE多语言
-          gte-multilingual-reranker-base
-        BCE重排序
-          bce-reranker-base_v1
+      Jina 系列
+        jina-reranker-v2-base-multilingual
+        jina-reranker-v1-turbo-en
+      GTE 系列
+        gte-multilingual-reranker-base
+      BCE 系列
+        bce-reranker-base_v1
     技术架构
       Encoder-only
-        CLS pooling
-        Mean pooling
       Decoder-only
-        Last token pooling
-        ICL支持
       Layer-wise
       Lightweight
-    应用场景
-      通用检索
-      多语言应用
-      代码检索
-      RAG系统
-      语义搜索
+    功能特性
+      多语言
+      多功能
+      长文本
+      代码专用
+      上下文学习
 ```
 
 ---
 
-## 目录
-- [1. 嵌入模型综述](#1-嵌入模型综述)
-- [2. 重排序模型综述](#2-重排序模型综述)
-- [3. 模型分类与对比](#3-模型分类与对比)
-- [4. 技术实现细节](#4-技术实现细节)
-- [5. 选择指南](#5-选择指南)
-- [6. 总结与展望](#6-总结与展望)
+## 嵌入模型（Embedder）综述
 
----
+### BGE 系列模型
 
-### 1. 嵌入模型综述
+BGE（BAAI General Embedding）系列是 FlagEmbedding 的核心模型，由北京智源人工智能研究院自主研发。
 
-```mermaid
-mindmap
-  root((嵌入模型<br/>系列对比))
-    BGE 系列
-      架构: Encoder-only
-      Pooling: CLS
-      特色: BGE-M3 三功能
-      语言: 中英文 + 多语言
-      推荐: ⭐⭐⭐⭐⭐
-    Qwen3-Embedding
-      架构: Decoder-only
-      Pooling: Last Token
-      特色: Qwen3 大模型
-      规模: 0.6B/4B/8B
-      推荐: ⭐⭐⭐⭐
-    E5 系列
-      架构: Encoder-only
-      Pooling: Mean
-      特色: 经典老牌
-      语言: 多语言
-      推荐: ⭐⭐⭐
-    GTE 系列
-      架构: Encoder/Decoder
-      Pooling: Mean/CLS
-      特色: 阿里开源
-      语言: 中英文 + 多语言
-      推荐: ⭐⭐⭐⭐
-    SFR 系列
-      架构: Decoder-only
-      Pooling: Last Token
-      特色: Salesforce
-      基础: Mistral
-      推荐: ⭐⭐⭐
-    Linq 系列
-      架构: Decoder-only
-      特色: Linq-Embed
-      基础: Mistral
-      推荐: ⭐⭐
-    BCE 系列
-      架构: Encoder-only
-      Pooling: CLS
-      特色: 百度
-      语言: 中文
-      推荐: ⭐⭐
-```
+#### BGE v1.0 系列
 
-#### 1.1 BGE 系列模型
-
-BGE（BAAI General Embedding）是 FlagEmbedding 的核心产品线，提供了丰富的中英文和多语言嵌入模型。
-
-#### 1.1.1 BGE v1.0 系列
-
-```mermaid
-flowchart TD
-    A[文本输入 Text] --> B[Tokenizer]
-    B --> C[BERT Encoder]
-    C --> D[CLS Token Output]
-    D --> E[Pooling]
-    E --> F[Embedding Output]
-    
-    subgraph 规模选择
-        G[Small 小模型]
-        H[Base 中模型]
-        I[Large 大模型]
-    end
-    
-    G & H & I -.-> C
-    
-    style C fill:#e3f2fd
-    style D fill:#fff3e0
-```
-
-| 模型名称 | 规模 | 语言 | Pooling |
-|---------|------|------|---------|
-| `bge-large-en` | Large | 英文 | CLS |
-| `bge-base-en` | Base | 英文 | CLS |
-| `bge-small-en` | Small | 英文 | CLS |
-| `bge-large-zh` | Large | 中文 | CLS |
-| `bge-base-zh` | Base | 中文 | CLS |
-| `bge-small-zh` | Small | 中文 | CLS |
-
-特点：
-- 早期 BGE 版本，性能稳定
-- 中英双语分别优化
-- CLS pooling 策略
-- 轻量级模型部署友好
-
-#### 1.1.2 BGE v1.5 系列
-
-```mermaid
-flowchart TD
-    A[文本输入 Text] --> B[优化 Tokenizer]
-    B --> C[增强 BERT Encoder]
-    C --> D[CLS Token Output]
-    D --> E[改进 Pooling]
-    E --> F[归一化 Normalization]
-    F --> G[Embedding Output]
-    
-    note over C
-        v1.5 改进：
-        - 更好的预训练
-        - 优化的数据
-        - 更强的泛化
-    end
-    
-    style C fill:#e1bee7
-    style D fill:#fff8e1
-```
-
-| 模型名称 | 规模 | 语言 | Pooling |
-|---------|------|------|---------|
-| `bge-large-en-v1.5` | Large | 英文 | CLS |
-| `bge-base-en-v1.5` | Base | 英文 | CLS |
-| `bge-small-en-v1.5` | Small | 英文 | CLS |
-| `bge-large-zh-v1.5` | Large | 中文 | CLS |
-| `bge-base-zh-v1.5` | Base | 中文 | CLS |
-| `bge-small-zh-v1.5` | Small | 中文 | CLS |
-
-特点：
-- 相比 v1.0 版本性能大幅提升
-- 优化的训练数据和策略
-- 在多个基准上达到 SOTA 水平
-- 推荐用于生产环境
-
-#### 1.1.3 BGE-M3 模型
-
-```mermaid
-flowchart TD
-    A[文本输入 Text] --> B[Tokenizer]
-    B --> C[BERT Encoder]
-    
-    C --> D[Dense 密集表示]
-    C --> E[Sparse 稀疏表示]
-    C --> F[ColBERT Token表示]
-    
-    D --> G[CLS Pooling]
-    E --> H[词汇权重计算]
-    F --> I[Multi-Vector]
-    
-    G --> J[语义匹配]
-    H --> K[精确匹配]
-    I --> L[细粒度匹配]
-    
-    J & K & L --> M[融合匹配 Fusion]
-    
-    note over D,E,F
-        多功能：Dense + Sparse + ColBERT
-        多语言：100+ 语言支持
-        多粒度：支持长文本
-    end
-    
-    style C fill:#ffe0b2
-    style D fill:#c8e6c9
-    style E fill:#bbdefb
-    style F fill:#f8bbd9
-```
-
-`bge-m3` 是 BGE 系列的旗舰产品，具有以下特色：
-
-**核心功能：**
-- **多功能嵌入**：同时支持 Dense、Sparse 和 ColBERT 三种表示
-- **多语言支持**：支持 100+ 语言的检索任务
-- **多粒度输入**：最大支持 8192 token 长度
+| 模型名称 | 语言 | 规模 | 说明 |
+|---------|------|------|------|
+| bge-large-en | English | Large | 英文大模型 |
+| bge-base-en | English | Base | 英文基础模型 |
+| bge-small-en | English | Small | 英文小模型 |
+| bge-large-zh | Chinese | Large | 中文大模型 |
+| bge-base-zh | Chinese | Base | 中文基础模型 |
+| bge-small-zh | Chinese | Small | 中文小模型 |
 
 **技术特点：**
-- Dense 表示：CLS token 嵌入，用于全局语义
-- Sparse 表示：词汇权重，用于精确匹配
-- ColBERT 表示：token 级别嵌入，用于细粒度匹配
-- 三种表示融合，在 MTEB 基准上表现优异
+- 基于 Encoder-only 架构
+- 使用 CLS pooling 策略
+- 查询指令格式：
+  - 英文：`Represent this sentence for searching relevant passages: `
+  - 中文：`为这个句子生成表示以用于检索相关文章：`
 
-适用场景：
+**适用场景：**
+- 通用文本检索
+- 语义相似度计算
+- 问答系统
+
+**代码引用：**
+```python
+from FlagEmbedding import FlagAutoModel
+
+model = FlagAutoModel.from_finetuned('BAAI/bge-large-en-v1.5')
+```
+
+#### BGE v1.5 系列
+
+v1.5 是 v1.0 的升级版本，主要改进：
+
+| 模型名称 | 语言 | 规模 | 改进点 |
+|---------|------|------|--------|
+| bge-large-en-v1.5 | English | Large | 相似度分布更合理 |
+| bge-base-en-v1.5 | English | Base | 无指令检索能力提升 |
+| bge-small-en-v1.5 | English | Small | 小模型性能优化 |
+| bge-large-zh-v1.5 | Chinese | Large | 中文检索优化 |
+| bge-base-zh-v1.5 | Chinese | Base | 中文检索优化 |
+| bge-small-zh-v1.5 | Chinese | Small | 中文检索优化 |
+
+**核心改进：**
+1. 缓解相似度分布问题
+2. 提升无指令情况下的检索能力
+3. 在 MTEB 和 C-MTEB 榜单上取得最佳性能
+
+#### BGE-M3 模型（重点介绍）
+
+**模型名称：** `bge-m3`
+
+**核心特性：**
+- **多功能（Multi-function）**：同时支持稠密、稀疏、多向量检索
+- **多语言（Multilingual）**：支持 100+ 种语言
+- **多粒度（Multi-granularity）**：支持最长 8192 长度的输入文本
+
+**技术架构：**
+- Encoder-only 架构
+- 同时输出多种表示
+- 支持混合检索策略
+
+**检索能力：**
+1. **稠密检索（Dense Retrieval）**：传统的向量检索
+2. **稀疏检索（Sparse Retrieval）**：基于词袋的检索
+3. **多向量检索（ColBERT）**：细粒度的 token 级匹配
+
+**适用场景：**
 - 多语言检索系统
-- 需要精确匹配的场景
-- 长文本处理
+- 长文档检索
+- 高精度混合检索
+- 企业级知识库应用
 
-参考代码文件：[model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py#L60-L62)
+**代码引用：**
+```python
+from FlagEmbedding import BGEM3FlagModel
 
-#### 1.1.4 BGE 专用模型
+model = BGEM3FlagModel('BAAI/bge-m3', use_fp16=True)
 
-| 模型名称 | 特点 | 适用场景 |
-|---------|------|---------|
-| `bge-code-v1` | 代码专用嵌入 | 代码搜索、代码库检索 |
-| `bge-multilingual-gemma2` | 基于 Gemma2 的多语言模型 | 多语言通用嵌入 |
-| `bge-en-icl` | 上下文学习支持 | Few-shot 嵌入任务 |
-| `bge-reasoner-embed-qwen3-8b-0923` | Qwen3 8B 推理器嵌入 | RAG 系统中的推理增强 |
-
-### 1.2 Qwen3-Embedding 系列
-
-```mermaid
-flowchart TD
-    A[查询 Instruct + Query] --> B[Tokenizer]
-    B --> C[Qwen3 Decoder]
-    
-    C --> D[Hidden States]
-    D --> E[Last Token]
-    E --> F[Embedding Output]
-    
-    subgraph 规模选项
-        G[0.6B 小模型]
-        H[4B 中模型]
-        I[8B 大模型]
-    end
-    
-    G & H & I -.-> C
-    
-    note over A,E
-        查询格式:
-        Instruct: {task}\nQuery: {text}
-    end
-    
-    style C fill:#e1bee7
-    style E fill:#b2ebf2
+# 多种嵌入方式
+embeddings = model.encode(['文本内容'], return_dense=True, return_sparse=True, return_colbert_vecs=True)
 ```
 
-| 模型名称 | 参数量 | Pooling |
-|---------|--------|---------|
-| `Qwen3-Embedding-0.6B` | 0.6B | Last Token |
-| `Qwen3-Embedding-4B` | 4B | Last Token |
-| `Qwen3-Embedding-8B` | 8B | Last Token |
+**文件位置：** [FlagEmbedding/inference/embedder/encoder_only/m3.py](file:///workspace/FlagEmbedding/inference/embedder/encoder_only/m3.py)
 
-特点：
-- Decoder-only 架构，基于 Qwen3 大模型
-- 使用 Last Token pooling
-- 查询指令格式：`Instruct: {}\nQuery:{}`
-- 参数量从 0.6B 到 8B 可选，适应不同资源需求
+#### BGE 专用模型系列
 
-参考代码文件：[model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py#L114-L127)
+##### 1. bge-code-v1
 
-### 1.3 E5 系列模型
+**特点：**
+- 专为代码嵌入设计
+- 基于 Decoder-only 架构
+- 使用 Last token pooling
+- 查询指令格式：`<instruct>{}\n<query>{}`
 
-#### 1.3.1 基础 E5 模型
+**适用场景：**
+- 代码检索
+- 代码相似度计算
+- 代码推荐系统
 
-```mermaid
-flowchart TD
-    A[文本输入 Text] --> B[Tokenizer]
-    B --> C[BERT Encoder]
-    C --> D[所有 Token Hidden States]
-    D --> E[Mean Pooling 平均池化]
-    E --> F[Embedding Output]
-    
-    subgraph 规模选择
-        G[Small 小模型]
-        H[Base 中模型]
-        I[Large 大模型]
-    end
-    
-    G & H & I -.-> C
-    
-    style C fill:#c8e6c9
-    style E fill:#fff9c4
-```
+##### 2. bge-en-icl
 
-| 模型名称 | 规模 | Pooling |
-|---------|------|---------|
-| `e5-large` | Large | Mean |
-| `e5-base` | Base | Mean |
-| `e5-small` | Small | Mean |
+**特点：**
+- 支持上下文学习（In-Context Learning）
+- 基于 Decoder-only 架构
+- 可以通过示例提升检索效果
+- 查询指令格式：`<instruct>{}\n<query>{}`
 
-#### 1.3.2 E5 v2 模型
+**技术优势：**
+- 通过少量示例编码语义更丰富的查询
+- 增强嵌入的语义表征能力
+- 灵活适应不同任务
 
-```mermaid
-flowchart TD
-    A[文本输入 Text] --> B[改进 Tokenizer]
-    B --> C[增强 Encoder v2]
-    C --> D[所有 Token Hidden States]
-    D --> E[优化 Mean Pooling]
-    E --> F[归一化]
-    F --> G[Embedding Output]
-    
-    note over C
-        v2 改进:
-        - 更好的预训练
-        - 优化的数据
-        - 更强的检索性能
-    end
-    
-    style C fill:#b3e5fc
-    style E fill:#fff3e0
-```
+##### 3. bge-multilingual-gemma2
 
-| 模型名称 | 规模 | Pooling |
-|---------|------|---------|
-| `e5-large-v2` | Large | Mean |
-| `e5-base-v2` | Base | Mean |
-| `e5-small-v2` | Small | Mean |
+**特点：**
+- 基于 Gemma-2-9b 的多语言模型
+- Decoder-only 架构
+- 支持多种语言和多样下游任务
+- 在 MIRACL, MTEB-fr, MTEB-pl 上取得最佳结果
 
-#### 1.3.3 多语言 E5 系列
+##### 4. bge-reasoner-embed-qwen3-8b-0923
 
-```mermaid
-flowchart TD
-    A[多语言文本 Multilingual] --> B[多语言 Tokenizer]
-    B --> C[Multilingual BERT]
-    C --> D[所有 Token Hidden States]
-    D --> E[Mean Pooling]
-    E --> F[Embedding Output]
-    
-    subgraph 指令版本
-        G[Instruct 指令输入] --> H[指令格式化]
-        H --> A
-    end
-    
-    note over C
-        支持语言: 100+
-        特点: 跨语言检索
-    end
-    
-    style C fill:#ffcc80
-    style E fill:#f0f4c3
-```
+**特点：**
+- 推理增强嵌入模型
+- 基于 Qwen3-8B
+- 查询指令格式：`Instruct: {}\nQuery: {}`
 
-| 模型名称 | 特点 | Pooling |
-|---------|------|---------|
-| `multilingual-e5-large` | 大参数量 | Mean |
-| `multilingual-e5-base` | 中等参数量 | Mean |
-| `multilingual-e5-small` | 轻量级 | Mean |
-| `multilingual-e5-large-instruct` | 带指令支持 | Mean |
-
-#### 1.3.4 E5-Mistral
-
-```mermaid
-flowchart TD
-    A[指令 + 文本 Instruct+Text] --> B[Tokenizer]
-    B --> C[Mistral 7B Decoder]
-    C --> D[Hidden States]
-    D --> E[Last Token Pooling]
-    E --> F[Embedding Output]
-    
-    note over A,E
-        基于 Mistral 7B
-        支持指令格式
-        更强的语义理解
-    end
-    
-    style C fill:#e1bee7
-    style E fill:#b2ebf2
-```
-
-| 模型名称 | 特点 |
-|---------|------|
-| `e5-mistral-7b-instruct` | 基于 Mistral 7B，指令支持 |
-
-特点：
-- 早期开源嵌入模型的代表
-- 使用 Mean pooling 策略
-- 多语言 E5 系列支持多种语言
-- E5-Mistral-7B 提供更强的语义理解能力
-
-参考代码文件：[model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py#L131-L176)
-
-### 1.4 GTE 系列模型
-
-#### 1.4.1 基础 GTE 模型
-
-```mermaid
-flowchart TD
-    A[文本输入 Text] --> B[Tokenizer]
-    B --> C[GTE BERT Encoder]
-    C --> D[所有 Token Hidden States]
-    D --> E[Mean Pooling 平均池化]
-    E --> F[Embedding Output]
-    
-    subgraph 规模选择
-        G[Small 小模型]
-        H[Base 中模型]
-        I[Large 大模型]
-    end
-    
-    G & H & I -.-> C
-    
-    style C fill:#c8e6c9
-    style E fill:#fff9c4
-```
-
-| 模型名称 | 规模 | Pooling |
-|---------|------|---------|
-| `gte-large` | Large | Mean |
-| `gte-base` | Base | Mean |
-| `gte-small` | Small | Mean |
-
-#### 1.4.2 GTE v1.5 模型
-
-```mermaid
-flowchart TD
-    A[英文文本 English] --> B[优化 Tokenizer]
-    B --> C[GTE v1.5 Encoder]
-    C --> D[CLS Token]
-    D --> E[Pooling]
-    E --> F[归一化]
-    F --> G[Embedding Output]
-    
-    note over C
-        v1.5 改进:
-        - 英文专项优化
-        - CLS Pooling
-        - 更好的检索性能
-    end
-    
-    style C fill:#b3e5fc
-    style D fill:#fff3e0
-```
-
-| 模型名称 | 规模 | Pooling |
-|---------|------|---------|
-| `gte-large-en-v1.5` | Large | CLS |
-| `gte-base-en-v1.5` | Base | CLS |
-
-#### 1.4.3 中文 GTE 系列
-
-```mermaid
-flowchart TD
-    A[中文文本 Chinese] --> B[中文 Tokenizer]
-    B --> C[Chinese GTE Encoder]
-    C --> D[CLS Token]
-    D --> E[CLS Pooling]
-    E --> F[Embedding Output]
-    
-    subgraph 规模选择
-        G[Small 小模型]
-        H[Base 中模型]
-        I[Large 大模型]
-    end
-    
-    G & H & I -.-> C
-    
-    note over C
-        特点: 中文专项优化
-        使用 CLS Pooling
-    end
-    
-    style C fill:#ffcc80
-    style D fill:#f0f4c3
-```
-
-| 模型名称 | 规模 | Pooling |
-|---------|------|---------|
-| `gte-large-zh` | Large | CLS |
-| `gte-base-zh` | Base | CLS |
-| `gte-small-zh` | Small | CLS |
-
-#### 1.4.4 GTE-Qwen 系列
-
-```mermaid
-flowchart TD
-    A[Instruct + Query] --> B[Tokenizer]
-    B --> C[Qwen Decoder]
-    C --> D[Hidden States]
-    D --> E[Last Token Pooling]
-    E --> F[Embedding Output]
-    
-    subgraph 规模选项
-        G[Qwen1.5 7B]
-        H[Qwen2 1.5B]
-        I[Qwen2 7B]
-    end
-    
-    G & H & I -.-> C
-    
-    note over A,E
-        支持指令格式
-        基于 Qwen 系列模型
-    end
-    
-    style C fill:#e1bee7
-    style E fill:#b2ebf2
-```
-
-| 模型名称 | 特点 |
-|---------|------|
-| `gte-Qwen2-7B-instruct` | Qwen2 7B，指令支持 |
-| `gte-Qwen2-1.5B-instruct` | Qwen2 1.5B，指令支持 |
-| `gte-Qwen1.5-7B-instruct` | Qwen1.5 7B，指令支持 |
-
-#### 1.4.5 多语言 GTE
-
-```mermaid
-flowchart TD
-    A[多语言文本 Multilingual] --> B[多语言 Tokenizer]
-    B --> C[Multilingual GTE Encoder]
-    C --> D[CLS Token]
-    D --> E[CLS Pooling]
-    E --> F[Embedding Output]
-    
-    note over C
-        特点: 多语言支持
-        需要 trust_remote_code
-    end
-    
-    style C fill:#c5cae9
-    style D fill:#fff8e1
-```
-
-| 模型名称 | 特点 |
-|---------|------|
-| `gte-multilingual-base` | 多语言基础模型 |
-
-特点：
-- 阿里巴巴开源的嵌入模型
-- 支持中英文和多语言
-- 部分模型需要 `trust_remote_code=True`
-- GTE-Qwen 系列基于大语言模型
-
-参考代码文件：[model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py#L179-L228)
-
-### 1.5 其他嵌入模型
-
-#### 1.5.1 SFR 系列
-
-| 模型名称 | 特点 |
-|---------|------|
-| `SFR-Embedding-Mistral` | Salesforce 开源，基于 Mistral |
-| `SFR-Embedding-2_R` | Salesforce 最新版本 |
-
-#### 1.5.2 Linq 模型
-
-| 模型名称 | 特点 |
-|---------|------|
-| `Linq-Embed-Mistral` | Linq 基于 Mistral 的嵌入模型 |
-
-#### 1.5.3 BCE 模型
-
-| 模型名称 | 特点 |
-|---------|------|
-| `bce-embedding-base_v1` | 百度 BCE 嵌入模型 |
-
-参考代码文件：[model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py#L231-L256)
+**模型映射文件：** [FlagEmbedding/inference/embedder/model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py#L42-L111)
 
 ---
 
-### 2. 重排序模型综述
+### Qwen3-Embedding 系列
 
-```mermaid
-mindmap
-  root((重排序模型<br/>系列对比))
-    BGE 系列
-      架构: Encoder/Decoder
-      性能: ⭐⭐⭐⭐⭐
-      类型:
-        Base
-        Large
-        v2-M3
-        v2-Gemma
-        v2-Layerwise
-        v2.5-Lightweight
-      推荐: 首选 BGE
-    Jina 系列
-      架构: Encoder-only
-      性能: ⭐⭐⭐
-      系列:
-        v1-turbo-en
-        v2-base-multilingual
-    GTE 多语言
-      架构: Encoder-only
-      性能: ⭐⭐⭐
-      特色: 多语言
-    BCE 系列
-      架构: Encoder-only
-      性能: ⭐⭐
-      来源: 百度
-```
+Qwen3-Embedding 是通义千问 Qwen3 系列的嵌入模型。
 
-#### 2.1 BGE 系列重排序器
+| 模型名称 | 参数量 | 架构 | Pooling |
+|---------|--------|------|---------|
+| Qwen3-Embedding-0.6B | 0.6B | Decoder-only | Last token |
+| Qwen3-Embedding-4B | 4B | Decoder-only | Last token |
+| Qwen3-Embedding-8B | 8B | Decoder-only | Last token |
+
+**特点：**
+- 基于通义千问 Qwen3 系列
+- Decoder-only 架构
+- 查询指令格式：`Instruct: {}\nQuery:{}`
+- 提供不同规模的选择，平衡性能和资源消耗
+
+**适用场景：**
+- 通用文本嵌入
+- 中文为主的检索任务
+- 需要不同规模模型的场景
+
+**模型映射：** [FlagEmbedding/inference/embedder/model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py#L114-L127)
+
+---
+
+### E5 系列模型
+
+E5（Embedding v5）系列是 Microsoft 开发的嵌入模型。
+
+#### 基础 E5 模型
+
+| 模型名称 | 规模 | Pooling |
+|---------|------|---------|
+| e5-large | Large | Mean |
+| e5-base | Base | Mean |
+| e5-small | Small | Mean |
+
+#### E5 v2 模型
+
+| 模型名称 | 规模 | 改进 |
+|---------|------|------|
+| e5-large-v2 | Large | 性能优化 |
+| e5-base-v2 | Base | 性能优化 |
+| e5-small-v2 | Small | 性能优化 |
+
+#### E5-Mistral-7B
+
+**特点：**
+- 基于 Mistral-7B
+- Decoder-only 架构
+- Last token pooling
+- 查询指令格式：`Instruct: {}\nQuery: {}`
+
+#### Multilingual E5 系列
+
+| 模型名称 | 特点 |
+|---------|------|
+| multilingual-e5-large | 多语言大模型 |
+| multilingual-e5-base | 多语言基础模型 |
+| multilingual-e5-small | 多语言小模型 |
+| multilingual-e5-large-instruct | 支持指令的多语言大模型 |
+
+**适用场景：**
+- 英文为主的检索任务
+- 多语言检索
+- 企业级应用
+
+**模型映射：** [FlagEmbedding/inference/embedder/model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py#L130-L176)
+
+---
+
+### GTE 系列模型
+
+GTE（General Text Embedding）系列是阿里巴巴开发的嵌入模型。
+
+#### GTE 基础版
+
+| 模型名称 | 语言 | Pooling |
+|---------|------|---------|
+| gte-large | English | Mean |
+| gte-base | English | Mean |
+| gte-small | English | Mean |
+| gte-large-zh | Chinese | CLS |
+| gte-base-zh | Chinese | CLS |
+| gte-small-zh | Chinese | CLS |
+
+#### GTE v1.5
+
+| 模型名称 | 特点 |
+|---------|------|
+| gte-large-en-v1.5 | 英文 v1.5 大模型 |
+| gte-base-en-v1.5 | 英文 v1.5 基础模型 |
+
+#### GTE-Qwen 系列
+
+| 模型名称 | 特点 |
+|---------|------|
+| gte-Qwen2-7B-instruct | 基于 Qwen2-7B 的指令模型 |
+| gte-Qwen2-1.5B-instruct | 基于 Qwen2-1.5B 的指令模型 |
+| gte-Qwen1.5-7B-instruct | 基于 Qwen1.5-7B 的指令模型 |
+
+#### GTE 多语言
+
+| 模型名称 | 特点 |
+|---------|------|
+| gte-multilingual-base | 多语言基础模型 |
+
+**特点：**
+- 支持中英文
+- 提供多种规模选择
+- GTE-Qwen 系列基于通义千问架构
+
+**适用场景：**
+- 中英文混合检索
+- 电商领域应用
+- 阿里云生态系统集成
+
+**模型映射：** [FlagEmbedding/inference/embedder/model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py#L179-L228)
+
+---
+
+### SFR 系列模型
+
+SFR（Salesforce Representations）系列是 Salesforce 开发的嵌入模型。
+
+| 模型名称 | 特点 |
+|---------|------|
+| SFR-Embedding-Mistral | 基于 Mistral 架构 |
+| SFR-Embedding-2_R | 第二代 SFR 嵌入模型 |
+
+**共同特点：**
+- Decoder-only 架构
+- Last token pooling
+- 查询指令格式：`Instruct: {}\nQuery: {}`
+
+**适用场景：**
+- 企业级应用
+- 与 Salesforce 生态集成
+- 英文检索任务
+
+**模型映射：** [FlagEmbedding/inference/embedder/model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py#L231-L240)
+
+---
+
+### Linq 模型
+
+| 模型名称 | 特点 |
+|---------|------|
+| Linq-Embed-Mistral | 基于 Mistral 的 Linq 嵌入 |
+
+**特点：**
+- Decoder-only 架构
+- Last token pooling
+- 查询指令格式：`Instruct: {}\nQuery: {}`
+
+**适用场景：**
+- 特定领域检索
+- 与 Linq 生态集成
+
+**模型映射：** [FlagEmbedding/inference/embedder/model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py#L243-L248)
+
+---
+
+### BCE 模型
+
+| 模型名称 | 特点 |
+|---------|------|
+| bce-embedding-base_v1 | BCE 基础嵌入模型 |
+
+**特点：**
+- Encoder-only 架构
+- CLS pooling
+
+**适用场景：**
+- 中文检索
+- BCE 生态系统
+
+**模型映射：** [FlagEmbedding/inference/embedder/model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py#L251-L256)
+
+---
+
+## 重排序模型（Reranker）综述
+
+重排序模型（Reranker）通常用于在初步检索后，对候选文档进行更精细的相关性排序，提升最终检索质量。
+
+### BGE 系列重排序器
+
+BGE 系列重排序器是 FlagEmbedding 的核心重排序模型。
 
 | 模型名称 | 架构 | 特点 |
 |---------|------|------|
-| `bge-reranker-base` | Encoder-only | 基础重排序器 |
-| `bge-reranker-large` | Encoder-only | 大参数量版本 |
-| `bge-reranker-v2-m3` | Encoder-only | M3 版本重排序器 |
-| `bge-reranker-v2-gemma` | Decoder-only | 基于 Gemma 的重排序器 |
-| `bge-reranker-v2-minicpm-layerwise` | Decoder-only Layer-wise | 分层输出融合 |
-| `bge-reranker-v2.5-gemma2-lightweight` | Decoder-only Lightweight | 轻量级 Gemma2 重排序器 |
+| bge-reranker-base | Encoder-only | 基础重排序模型 |
+| bge-reranker-large | Encoder-only | 大型重排序模型，精度更高 |
+| bge-reranker-v2-m3 | Encoder-only | 多语言轻量级模型，易于部署 |
+| bge-reranker-v2-gemma | Decoder-only | 基于 Gemma，多语言支持 |
+| bge-reranker-v2-minicpm-layerwise | Decoder-only | 分层架构，支持选择输出层加速 |
+| bge-reranker-v2.5-gemma2-lightweight | Decoder-only | 轻量级，支持压缩和分层操作 |
 
-#### 2.1.1 Encoder-only 重排序器
+#### 详细说明
 
-```mermaid
-flowchart TD
-    A[查询 Query] --> C[拼接输入]
-    B[文档 Document] --> C
-    C --> D[Tokenizer]
-    D --> E[Encoder Transformer]
-    E --> F[CLS Token Pooling]
-    F --> G[线性层 Linear Layer]
-    G --> H[Sigmoid 激活]
-    H --> I[相关性分数 Score]
-    
-    style E fill:#e1f5ff
-    style F fill:#fff4e1
-```
+##### 1. bge-reranker-base & large
 
-`bge-reranker-base`、`bge-reranker-large`、`bge-reranker-v2-m3`：
-- 基于 Cross-Encoder 架构
-- 将查询和文档拼接输入
-- 使用 CLS token 进行分类
-- 输出相关性分数
-- 性能优异但计算成本较高
+**特点：**
+- Encoder-only 架构
+- 交叉编码器（Cross-encoder）模型
+- 精度比向量模型更高
+- 推理效率相对较低
 
-#### 2.1.2 Decoder-only 重排序器
+**适用场景：**
+- 高精度重排序
+- 中英文混合场景
+- 对检索质量要求高的应用
 
-```mermaid
-flowchart TD
-    A[查询 Query] --> C
-    B[文档 Document] --> C[格式化输入]
-    C --> D[Tokenizer]
-    D --> E[Decoder Transformer]
-    E --> F[Last Token Pooling]
-    F --> G[线性层 Linear Layer]
-    G --> H[Score Head]
-    H --> I[相关性分数 Score]
-    
-    style E fill:#f0e6ff
-    style F fill:#e6f7ff
-```
+##### 2. bge-reranker-v2-m3
 
-`bge-reranker-v2-gemma`：
-- 基于 Gemma 大模型
-- 使用 Decoder-only 架构
-- 使用 Last Token Pooling
-- 更强的语义理解能力
+**特点：**
+- 轻量级交叉编码器
+- 强大的多语言能力
+- 易于部署
+- 快速推理
 
-#### 2.1.3 Layer-wise 重排序器
+##### 3. bge-reranker-v2-gemma
 
-```mermaid
-flowchart TD
-    A[查询 Query] --> F
-    B[文档 Document] --> F[输入格式化]
-    F --> G[Tokenizer]
-    G --> H[Decoder Transformer]
-    
-    H --> I[层1输出]
-    H --> J[层2输出]
-    H --> K[...中间层...]
-    H --> L[最后层输出]
-    
-    I --> M[层融合 Layer Fusion]
-    J --> M
-    K --> M
-    L --> M
-    
-    M --> N[加权融合 Weighted Sum]
-    N --> O[Score Head]
-    O --> P[相关性分数 Score]
-    
-    style H fill:#fff0f5
-    style M fill:#f0fff4
-    style N fill:#fff8e6
-```
+**特点：**
+- 基于 Gemma 架构
+- 支持多语言
+- 英文和多语言表现出色
 
-`bge-reranker-v2-minicpm-layerwise`：
-- 基于 MiniCPM 模型
-- 提取多层隐藏状态
-- 使用层输出融合技术
-- 加权融合多层信息
-- 更好的信息利用
+##### 4. bge-reranker-v2-minicpm-layerwise
 
-#### 2.1.4 Lightweight 重排序器
+**特点：**
+- 分层（Layer-wise）架构
+- 允许自由选择输出层
+- 支持推理加速
+- 中英文表现良好
 
-```mermaid
-flowchart TD
-    A[查询 Query] --> C
-    B[文档 Document] --> C[高效输入处理]
-    C --> D[优化 Tokenizer]
-    D --> E[轻量级 Decoder]
-    E --> F[轻量化 Pooling]
-    F --> G[快速 Score Head]
-    G --> H[相关性分数 Score]
-    
-    note over D,E,F
-        优化特点：
-        - 量化 Quantization
-        - 剪枝 Pruning
-        - 蒸馏 Distillation
-    end
-    
-    style E fill:#e8fff0
-    style F fill:#fffce6
-```
+##### 5. bge-reranker-v2.5-gemma2-lightweight
 
-`bge-reranker-v2.5-gemma2-lightweight`：
-- 基于 Gemma2 的轻量级版本
-- 量化/剪枝/蒸馏优化
-- 优化的推理速度
-- 保持较高重排序质量
-- 适合资源受限场景
+**特点：**
+- 基于 Gemma-2
+- 轻量级设计
+- 支持令牌压缩
+- 分层轻量操作
+- 节省资源的同时保持良好性能
 
-参考代码文件：[model_mapping.py](file:///workspace/FlagEmbedding/inference/reranker/model_mapping.py#L31-L56)
-
-### 2.2 其他重排序模型
-
-| 模型名称 | 来源 | 特点 |
-|---------|------|------|
-| `jina-reranker-v2-base-multilingual` | Jina AI | 多语言重排序 |
-| `jina-reranker-v1-turbo-en` | Jina AI | 英文快速重排序 |
-| `gte-multilingual-reranker-base` | Alibaba | 多语言 GTE 重排序 |
-| `bce-reranker-base_v1` | 百度 | BCE 重排序器 |
-
-参考代码文件：[model_mapping.py](file:///workspace/FlagEmbedding/inference/reranker/model_mapping.py#L58-L74)
-
----
-
-## 3. 模型分类与对比
-
-### 3.1 按架构分类
-
-| 架构类型 | 代表模型 | Pooling | 特点 |
-|---------|---------|---------|------|
-| **Encoder-only** | BGE v1.5, GTE, E5 | CLS / Mean | 成熟稳定，计算高效 |
-| **Decoder-only** | Qwen3-Embedding, GTE-Qwen | Last Token | 基于大语言模型，更强语义 |
-| **Layer-wise** | bge-reranker-v2-minicpm-layerwise | 层融合 | 多层输出融合，信息丰富 |
-| **Lightweight** | bge-reranker-v2.5-gemma2-lightweight | - | 优化速度，降低资源占用 |
-
-### 3.2 按功能分类
-
-| 功能分类 | 代表模型 | 特点 |
-|---------|---------|------|
-| **基础嵌入** | BGE v1.5, E5, GTE | 通用语义嵌入 |
-| **多功能嵌入** | BGE-M3 | Dense + Sparse + ColBERT |
-| **上下文学习** | bge-en-icl, Qwen3-Embedding | Few-shot 支持 |
-| **代码特定** | bge-code-v1 | 代码检索优化 |
-| **多语言** | BGE-M3, multilingual-e5, gte-multilingual | 多语言支持 |
-
-### 3.3 性能与资源对比
-
-#### 3.3.1 嵌入模型性能参考
-
-| 模型系列 | 性能等级 | 推理速度 | 内存占用 |
-|---------|---------|---------|---------|
-| BGE-M3 | ⭐⭐⭐⭐⭐ | 中 | 中高 |
-| BGE Large v1.5 | ⭐⭐⭐⭐ | 中 | 中 |
-| BGE Base v1.5 | ⭐⭐⭐ | 快 | 低 |
-| Qwen3-Embedding 8B | ⭐⭐⭐⭐ | 中慢 | 高 |
-| GTE-Qwen 7B | ⭐⭐⭐⭐ | 中 | 中高 |
-| multilingual-e5 | ⭐⭐⭐ | 中 | 中 |
-
-#### 3.3.2 重排序器性能参考
-
-| 模型 | 性能等级 | 速度 | 内存 |
-|------|---------|------|------|
-| bge-reranker-large | ⭐⭐⭐⭐⭐ | 中 | 中高 |
-| bge-reranker-v2-minicpm-layerwise | ⭐⭐⭐⭐⭐ | 中 | 中 |
-| bge-reranker-v2.5-gemma2-lightweight | ⭐⭐⭐⭐ | 快 | 低 |
-
----
-
-## 4. 技术实现细节
-
-### 4.1 Pooling 策略
-
-FlagEmbedding 支持多种 Pooling 策略，在 [model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py#L26-L31) 中定义：
-
+**使用示例：**
 ```python
-class PoolingMethod(Enum):
-    LAST_TOKEN = "last_token"    # Decoder-only 模型使用
-    CLS = "cls"                  # Encoder-only 常用
-    MEAN = "mean"                # E5、GTE 等使用
+from FlagEmbedding import FlagAutoReranker
+
+reranker = FlagAutoReranker.from_finetuned('BAAI/bge-reranker-large')
+
+scores = reranker.compute_score([
+    ('查询', '文档1'),
+    ('查询', '文档2')
+])
 ```
 
-#### 4.1.1 CLS Pooling
-
-- 特点：使用 CLS token 的隐藏状态
-- 优点：简单高效，适合分类和检索
-- 使用：BGE 系列、GTE 中文系列等
-
-#### 4.1.2 Mean Pooling
-
-- 特点：对所有有效 token 的隐藏状态求平均
-- 优点：利用更多信息，对长文本友好
-- 使用：E5 系列、基础 GTE 系列等
-
-#### 4.1.3 Last Token Pooling
-
-- 特点：使用最后一个有效 token 的隐藏状态
-- 优点：适合 Decoder-only 架构，捕捉末尾信息
-- 使用：Qwen3-Embedding、GTE-Qwen、E5-Mistral 等
-
-### 4.2 查询指令格式
-
-不同模型有不同的查询指令格式，在 [model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py#L38) 中配置：
-
-| 模型系列 | 查询格式 |
-|---------|---------|
-| BGE-Qwen3 | `Instruct: {}\nQuery: {}` |
-| Qwen3-Embedding | `Instruct: {}\nQuery:{}` |
-| E5-Mistral-7B-instruct | `Instruct: {}\nQuery: {}` |
-| BGE-CODE | `<instruct>{}\n<query>{}` |
-| Multilingual-E5-instruct | `Instruct: {}\nQuery: {}` |
-
-### 4.3 自动模型加载
-
-FlagEmbedding 提供 `FlagAutoModel` 和 `FlagAutoReranker` 进行自动模型选择：
-
-```python
-from FlagEmbedding import FlagAutoModel, FlagAutoReranker
-
-embedder = FlagAutoModel.from_finetuned('bge-large-en-v1.5')
-reranker = FlagAutoReranker.from_finetuned('bge-reranker-large')
-```
-
-内部机制：
-- 维护模型映射表（`AUTO_EMBEDDER_MAPPING`、`AUTO_RERANKER_MAPPING`）
-- 根据模型名称自动选择对应的实现类
-- 配置默认的 Pooling、指令格式等
-
-相关代码：[auto_embedder.py](file:///workspace/FlagEmbedding/inference/auto_embedder.py)、[auto_reranker.py](file:///workspace/FlagEmbedding/inference/auto_reranker.py)
+**模型映射文件：** [FlagEmbedding/inference/reranker/model_mapping.py](file:///workspace/FlagEmbedding/inference/reranker/model_mapping.py#L31-L56)
 
 ---
 
-## 5. 选择指南
+### Jina 系列重排序器
 
-### 5.1 根据场景选择模型
+| 模型名称 | 特点 |
+|---------|------|
+| jinaai/jina-reranker-v2-base-multilingual | 多语言基础重排序器 |
+| jinaai/jina-reranker-v1-turbo-en | 英文 Turbo 版本 |
 
-#### 5.1.1 通用检索场景
+**特点：**
+- Encoder-only 架构
+- Jina AI 开发
+- 多语言支持
 
-推荐：
-- **性能优先**：`bge-large-en-v1.5` / `bge-large-zh-v1.5`
-- **效率优先**：`bge-base-en-v1.5` / `bge-base-zh-v1.5`
-- **资源受限**：`bge-small-en-v1.5` / `bge-small-zh-v1.5`
+**适用场景：**
+- 多语言检索
+- Jina 生态系统集成
+- 需要快速推理的场景
 
-#### 5.1.2 多语言应用
+**模型映射：** [FlagEmbedding/inference/reranker/model_mapping.py](file:///workspace/FlagEmbedding/inference/reranker/model_mapping.py#L59-L73)
 
-推荐：
-- **多语言综合最佳**：`bge-m3`
-- **开源多语言**：`multilingual-e5-large-instruct`、`gte-multilingual-base`
+---
 
-#### 5.1.3 代码检索
+### GTE 系列重排序器
 
-推荐：
+| 模型名称 | 特点 |
+|---------|------|
+| Alibaba-NLP/gte-multilingual-reranker-base | GTE 多语言重排序器 |
+
+**特点：**
+- Encoder-only 架构
+- 阿里巴巴开发
+- 多语言支持
+
+**适用场景：**
+- 电商领域
+- 中英文混合场景
+- 阿里云生态集成
+
+**模型映射：** [FlagEmbedding/inference/reranker/model_mapping.py](file:///workspace/FlagEmbedding/inference/reranker/model_mapping.py#L63-L65)
+
+---
+
+### BCE 重排序器
+
+| 模型名称 | 特点 |
+|---------|------|
+| maidalun1020/bce-reranker-base_v1 | BCE 重排序器 |
+
+**特点：**
+- Encoder-only 架构
+- BCE 生态系统
+
+**适用场景：**
+- 中文检索
+- BCE 生态集成
+
+**模型映射：** [FlagEmbedding/inference/reranker/model_mapping.py](file:///workspace/FlagEmbedding/inference/reranker/model_mapping.py#L67-L69)
+
+---
+
+## 模型分类与对比
+
+### 按架构分类
+
+```mermaid
+flowchart LR
+    A[模型架构] --> B[Encoder-only]
+    A --> C[Decoder-only]
+    A --> D[Layer-wise]
+    A --> E[Lightweight]
+    
+    B --> B1[bge-v1.5]
+    B --> B2[bge-m3]
+    B --> B3[E5]
+    B --> B4[GTE]
+    B --> B5[SFR]
+    B --> B6[Linq]
+    B --> B7[BCE]
+    B --> B8[bge-reranker-base/large]
+    
+    C --> C1[bge-code-v1]
+    C --> C2[bge-en-icl]
+    C --> C3[bge-multilingual-gemma2]
+    C --> C4[Qwen3-Embedding]
+    C --> C5[bge-reranker-v2-gemma]
+    
+    D --> D1[bge-reranker-v2-minicpm-layerwise]
+    
+    E --> E1[bge-reranker-v2.5-gemma2-lightweight]
+```
+
+### 按功能分类
+
+| 分类 | 模型示例 | 特点 |
+|-----|---------|------|
+| 基础嵌入 | bge-v1.5, E5, GTE | 通用文本嵌入 |
+| 多功能嵌入 | bge-m3 | 稠密+稀疏+多向量 |
+| 上下文学习 | bge-en-icl | 支持 In-Context Learning |
+| 代码专用 | bge-code-v1 | 代码嵌入 |
+| 多语言 | bge-m3, bge-multilingual-gemma2 | 支持多语言 |
+| 长文本 | bge-m3 (8192) | 支持长输入 |
+
+### 性能对比表
+
+#### 嵌入模型性能对比
+
+| 模型系列 | 参数量级 | 推理速度 | 内存占用 | 检索精度 | 多语言 | 适用场景 |
+|---------|---------|---------|---------|---------|--------|---------|
+| BGE v1.5 Small | Small | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ❌ | 快速原型、资源受限 |
+| BGE v1.5 Base | Base | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ❌ | 通用应用、平衡性能 |
+| BGE v1.5 Large | Large | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ❌ | 高精度要求 |
+| BGE-M3 | Large | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ✅ | 多语言、长文本、混合检索 |
+| Qwen3-Embedding-0.6B | 0.6B | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ❌ | 中文应用、快速部署 |
+| Qwen3-Embedding-8B | 8B | ⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ❌ | 中文高精度应用 |
+| E5 Small | Small | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ❌ | 英文快速应用 |
+| E5 Large | Large | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ❌ | 英文高精度 |
+| GTE | Mixed | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ✅ | 中英文混合、电商 |
+| SFR | 7B | ⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ❌ | 企业级英文应用 |
+
+*注：⭐ 越多表示越好/越大/越快*
+
+#### 重排序模型性能对比
+
+| 模型 | 架构 | 推理速度 | 精度 | 多语言 | 资源占用 |
+|-----|------|---------|------|--------|---------|
+| bge-reranker-base | Encoder-only | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ✅ | ⭐⭐⭐⭐ |
+| bge-reranker-large | Encoder-only | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ✅ | ⭐⭐⭐ |
+| bge-reranker-v2-m3 | Encoder-only | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ✅ | ⭐⭐⭐⭐⭐ |
+| bge-reranker-v2-gemma | Decoder-only | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ✅ | ⭐⭐⭐ |
+| bge-reranker-v2-minicpm-layerwise | Decoder-only | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ✅ | ⭐⭐⭐⭐ |
+| bge-reranker-v2.5-gemma2-lightweight | Decoder-only | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ✅ | ⭐⭐⭐⭐⭐ |
+
+### Pooling 策略对比
+
+| Pooling 方法 | 适用模型 | 特点 |
+|-------------|---------|------|
+| CLS | BGE v1/v1.5, BGE-M3, GTE, BCE | 使用<[BOS_never_used_51bce0c785ca2f68081bfa7d91973934]> token 表示，简单有效 |
+| Mean | E5, GTE 基础版 | 使用所有 token 的平均表示 |
+| Last token | Decoder-only 系列 | 使用最后一个 token，适合自回归模型 |
+
+**配置文件：** [FlagEmbedding/inference/embedder/model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py#L27-L39)
+
+---
+
+## 模型选择指南
+
+### 根据场景选择模型
+
+#### 场景 1：通用英文检索
+
+**推荐模型：**
+- 高精度：`bge-large-en-v1.5` 或 `e5-large-v2`
+- 平衡性能：`bge-base-en-v1.5`
+- 资源受限：`bge-small-en-v1.5`
+
+**重排序增强：** `bge-reranker-large`
+
+#### 场景 2：通用中文检索
+
+**推荐模型：**
+- 高精度：`bge-large-zh-v1.5`
+- 平衡性能：`bge-base-zh-v1.5`
+- 资源受限：`bge-small-zh-v1.5` 或 `Qwen3-Embedding-0.6B`
+
+**重排序增强：** `bge-reranker-large`
+
+#### 场景 3：多语言检索
+
+**推荐模型：**
+- 首选：`bge-m3`（多功能 + 多语言 + 长文本）
+- 备选：`bge-multilingual-gemma2` 或 `multilingual-e5-large`
+
+**重排序增强：** `bge-reranker-v2-m3`
+
+#### 场景 4：长文档检索
+
+**推荐模型：**
+- `bge-m3`（支持最长 8192）
+
+**重排序增强：** `bge-reranker-v2-gemma` 或 `bge-reranker-v2.5-gemma2-lightweight`
+
+#### 场景 5：代码检索
+
+**推荐模型：**
 - `bge-code-v1`
 
-#### 5.1.4 RAG 系统
+#### 场景 6：电商/中英文混合
 
-推荐：
-- **嵌入阶段**：`bge-m3` 或 `bge-large-en-v1.5`
-- **重排序阶段**：`bge-reranker-large` 或 `bge-reranker-v2-minicpm-layerwise`
-- **资源受限重排序**：`bge-reranker-v2.5-gemma2-lightweight`
+**推荐模型：**
+- GTE 系列：`gte-large-zh` 或 `gte-multilingual-base`
+- 备选：`bge-m3`
 
-#### 5.1.5 需要 Few-shot 能力
+**重排序增强：** `gte-multilingual-reranker-base`
 
-推荐：
-- `bge-en-icl`
-- `Qwen3-Embedding-8B` / `Qwen3-Embedding-4B`
-- `gte-Qwen2-7B-instruct`
+#### 场景 7：需要灵活性和示例学习
 
-### 5.2 平衡性能与资源
+**推荐模型：**
+- `bge-en-icl`（支持上下文学习）
 
-| 资源预算 | 推荐配置 |
-|---------|---------|
-| **高资源** | `bge-m3` + `bge-reranker-v2-minicpm-layerwise` |
-| **中资源** | `bge-large-en-v1.5` + `bge-reranker-large` |
-| **低资源** | `bge-base-en-v1.5` + `bge-reranker-v2.5-gemma2-lightweight` |
+### 平衡性能与资源
 
-### 5.3 最佳实践建议
+#### 资源受限场景（CPU/小内存）
 
-1. **检索阶段**：使用 Embedder + 向量数据库（如 Faiss、Milvus）
-2. **重排序阶段**：对 Top-100 结果使用 Reranker，平衡速度与精度
-3. **多语言场景**：优先考虑 BGE-M3
-4. **部署优化**：量化、缓存、批处理优化
-5. **持续监控**：在特定业务数据上评估和微调
+**推荐配置：**
+- 嵌入模型：`bge-small-en-v1.5` / `bge-small-zh-v1.5` / `Qwen3-Embedding-0.6B`
+- 重排序模型：`bge-reranker-v2-m3` 或 `bge-reranker-v2.5-gemma2-lightweight`
+- 参数设置：`use_fp16=True`
+
+#### 中等资源场景（单 GPU）
+
+**推荐配置：**
+- 嵌入模型：`bge-base-en-v1.5` / `bge-base-zh-v1.5`
+- 重排序模型：`bge-reranker-base` 或 `bge-reranker-v2-minicpm-layerwise`
+- 参数设置：`use_fp16=True`，合理 batch size
+
+#### 充足资源场景（多 GPU）
+
+**推荐配置：**
+- 嵌入模型：`bge-large-en-v1.5` / `bge-large-zh-v1.5` / `bge-m3`
+- 重排序模型：`bge-reranker-large` 或 `bge-reranker-v2-gemma`
+- 参数设置：多设备并行，大 batch size
+
+### 最佳实践建议
+
+#### 1. 两阶段检索流程
+
+```mermaid
+flowchart LR
+    A[用户查询] --> B[嵌入模型<br/>粗检索]
+    B --> C[Top-K 候选]
+    C --> D[重排序模型<br/>精排序]
+    D --> E[最终结果]
+```
+
+**优点：**
+- 嵌入模型快速筛选大量文档
+- 重排序模型提升精度
+- 平衡效率和效果
+
+#### 2. 指令使用
+
+对于支持查询指令的模型，始终使用推荐的指令格式：
+
+```python
+# BGE v1.5 英文
+query_instruction = "Represent this sentence for searching relevant passages: "
+
+# BGE v1.5 中文
+query_instruction = "为这个句子生成表示以用于检索相关文章："
+
+# Decoder-only 模型
+query_instruction = "Instruct: {}\nQuery: {}"
+```
+
+#### 3. 批量推理
+
+充分利用批量推理提升效率：
+
+```python
+# 推荐
+embeddings = model.encode(large_corpus, batch_size=256)
+
+# 避免逐条编码
+for doc in large_corpus:
+    embedding = model.encode(doc)  # 低效
+```
+
+#### 4. 多设备并行
+
+对于大规模数据，使用多设备并行：
+
+```python
+model = FlagAutoModel.from_finetuned(
+    'BAAI/bge-large-en-v1.5',
+    devices=[0, 1, 2, 3]  # 使用多个 GPU
+)
+```
+
+#### 5. 混合检索策略
+
+对于 bge-m3，可以利用多种检索方式：
+
+```python
+# 1. 稠密检索
+dense_scores = dense_embeddings @ query_dense_embedding.T
+
+# 2. 稀疏检索
+sparse_scores = compute_sparse_similarity(sparse_embeddings, query_sparse_embedding)
+
+# 3. 多向量检索
+colbert_scores = compute_colbert_similarity(colbert_vecs, query_colbert_vecs)
+
+# 4. 混合打分
+final_scores = 0.6 * dense_scores + 0.2 * sparse_scores + 0.2 * colbert_scores
+```
 
 ---
 
-## 6. 总结与展望
+## 总结与展望
 
-### 6.1 FlagEmbedding 模型生态总结
+### FlagEmbedding 模型生态总结
 
-FlagEmbedding 建立了一个丰富且活跃的模型生态：
+FlagEmbedding 构建了一个完整、丰富的模型生态系统：
 
-- **10+ 品牌**：BGE、Qwen3、E5、GTE、SFR、Linq、BCE、Jina 等
-- **50+ 模型**：不同规模、语言、功能的嵌入和重排序模型
-- **多架构支持**：Encoder-only、Decoder-only、Layer-wise、Lightweight
-- **多功能特性**：Dense、Sparse、ColBERT 等多种表示
+1. **全面的模型支持**
+   - 7 个嵌入模型系列（BGE、Qwen3、E5、GTE、SFR、Linq、BCE）
+   - 4 个重排序模型系列（BGE、Jina、GTE、BCE）
+   - 覆盖 Encoder-only 和 Decoder-only 架构
 
-### 6.2 技术趋势
+2. **多样化的功能**
+   - 从通用嵌入到专用模型
+   - 从基础检索到多功能混合检索
+   - 从单语言到多语言支持
 
-从 FlagEmbedding 的演进可以观察到以下趋势：
+3. **完整的工具链**
+   - 推理接口统一
+   - 微调工具完善
+   - 评估基准齐全
 
-1. **多功能统一**：单一模型支持多种表示（如 BGE-M3）
-2. **大模型融合**：Decoder-only 架构的嵌入模型增多
-3. **轻量高效**：Lightweight 和优化版本不断推出
-4. **专用优化**：代码、多语言、指令等特定场景优化
+### 技术亮点
 
-### 6.3 对社区的贡献
+1. **统一抽象**：通过抽象基类实现不同模型的统一接口
+2. **自动加载**：智能模型映射，简化使用
+3. **多设备支持**：支持多种硬件设备和并行推理
+4. **研究导向**：持续集成最新研究成果
 
-FlagEmbedding 的贡献：
+### 未来发展方向
 
-- 统一的接口：`FlagAutoModel` 和 `FlagAutoReranker`
-- 丰富的模型选择：支持主流开源嵌入模型
-- 训练和评估工具链：完整的微调、评估、推理工具
-- 开放的生态：持续吸收新模型，扩展模型列表
+基于 FlagEmbedding 的发展轨迹，未来可能的发展方向：
 
-### 6.4 未来展望
+1. **模型规模扩展**
+   - 更大规模的模型
+   - 更高效的小模型
+   - 领域专用模型
 
-FlagEmbedding 的未来发展方向：
+2. **功能增强**
+   - 更强的多模态支持
+   - 更好的长文本处理
+   - 更灵活的混合检索
 
-- **更多模型**：持续引入新的优秀开源嵌入模型
-- **更高效推理**：量化、加速、蒸馏优化
-- **专用场景**：垂直领域的专用模型
-- **多模态扩展**：文本-图像、多语言-跨模态等
+3. **效率优化**
+   - 更快的推理速度
+   - 更低的内存占用
+   - 更好的硬件适配
+
+4. **生态完善**
+   - 更多模型支持
+   - 更丰富的工具
+   - 更活跃的社区
+
+### 对社区的贡献
+
+FlagEmbedding 为检索增强大语言模型领域做出了重要贡献：
+
+1. **开源高质量模型**：BGE 系列模型在多个榜单取得领先成绩
+2. **完整工具链**：提供从推理、微调到评估的全套工具
+3. **研究成果转化**：将最新研究成果快速转化为实用工具
+4. **标准化接口**：推动嵌入和重排序模型的接口标准化
 
 ---
 
 ## 附录
 
-### A. 支持的完整模型列表
+### 完整支持的模型列表
 
-#### A.1 嵌入模型（按字母序）
+#### 嵌入模型（共 40+ 个）
 
-| 模型 | 品牌 |
-|------|------|
-| BCE | bce-embedding-base_v1 |
-| BGE | bge-base-en, bge-base-en-v1.5, bge-base-zh, bge-base-zh-v1.5, bge-code-v1, bge-en-icl, bge-large-en, bge-large-en-v1.5, bge-large-zh, bge-large-zh-v1.5, bge-m3, bge-multilingual-gemma2, bge-reasoner-embed-qwen3-8b-0923, bge-small-en, bge-small-en-v1.5, bge-small-zh, bge-small-zh-v1.5 |
-| E5 | e5-base, e5-base-v2, e5-large, e5-large-v2, e5-mistral-7b-instruct, e5-small, e5-small-v2, multilingual-e5-base, multilingual-e5-large, multilingual-e5-large-instruct, multilingual-e5-small |
-| GTE | gte-base, gte-base-en-v1.5, gte-base-zh, gte-large, gte-large-en-v1.5, gte-large-zh, gte-multilingual-base, gte-Qwen1.5-7B-instruct, gte-Qwen2-1.5B-instruct, gte-Qwen2-7B-instruct, gte-small, gte-small-zh |
-| Linq | Linq-Embed-Mistral |
-| Qwen3 | Qwen3-Embedding-0.6B, Qwen3-Embedding-4B, Qwen3-Embedding-8B |
-| SFR | SFR-Embedding-2_R, SFR-Embedding-Mistral |
+详细列表请参考：[FlagEmbedding/inference/embedder/model_mapping.py](file:///workspace/FlagEmbedding/inference/embedder/model_mapping.py)
 
-#### A.2 重排序模型（按字母序）
+#### 重排序模型（共 9 个）
 
-| 模型 | 品牌 |
-|------|------|
-| BCE | bce-reranker-base_v1 |
-| BGE | bge-reranker-base, bge-reranker-large, bge-reranker-v2-gemma, bge-reranker-v2-m3, bge-reranker-v2-minicpm-layerwise, bge-reranker-v2.5-gemma2-lightweight |
-| GTE | gte-multilingual-reranker-base |
-| Jina | jina-reranker-v1-turbo-en, jina-reranker-v2-base-multilingual |
+详细列表请参考：[FlagEmbedding/inference/reranker/model_mapping.py](file:///workspace/FlagEmbedding/inference/reranker/model_mapping.py)
 
-### B. 相关文档与资源
+### 相关资源
 
-- [FlagEmbedding 推理模块分析](file:///workspace/ReadCode/03_inference_module.md)
-- [FlagEmbedding 微调模块分析](file:///workspace/ReadCode/04_finetune_module.md)
-- [FlagEmbedding GitHub](https://github.com/FlagOpen/FlagEmbedding)
-- [BGE 论文](https://arxiv.org/abs/2309.07597)
+- [项目 GitHub](https://github.com/FlagOpen/FlagEmbedding)
+- [HuggingFace 模型库](https://huggingface.co/BAAI)
+- [官方文档](https://flagembedding.readthedocs.io/)
+- [教程 Notebook](./../Tutorials/)
+
+### 参考文献
+
+1. C-Pack: Packaged Resources To Advance General Chinese Embedding (2023)
+2. LM-Cocktail: Resilient Tuning of Language Models via Model Merging (2023)
+3. Retrieve Anything To Augment Large Language Models (2023)
+4. BGE-M3: Multi-lingual, Multi-functional, Multi-granularity Embedding (2024)
+
+---
+
+*本综述基于 FlagEmbedding v1.1 版本编写，最后更新：2024年*

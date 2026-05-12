@@ -32,7 +32,8 @@ def read_markdown_files(directory):
         '04_finetune_module.md',
         '05_evaluation_module.md',
         '06_key_algorithms.md',
-        '07_research_projects.md'
+        '07_research_projects.md',
+        '08_model_survey.md'
     ]
     
     contents = []
@@ -101,6 +102,8 @@ def draw_simple_diagram(mermaid_code, output_path):
             draw_sequence_diagram(ax, mermaid_code)
         elif 'timeline' in mermaid_code:
             draw_timeline(ax, mermaid_code)
+        elif 'mindmap' in mermaid_code:
+            draw_mindmap(ax, mermaid_code)
         
         plt.tight_layout()
         plt.savefig(output_path, dpi=150, bbox_inches='tight', 
@@ -219,6 +222,57 @@ def draw_timeline(ax, mermaid_code):
         ax.add_patch(circle)
         ax.text(x, 5.5, title, ha='center', fontsize=10, weight='bold')
         ax.text(x, 2.5, desc, ha='center', fontsize=9, style='italic')
+
+def draw_mindmap(ax, mermaid_code):
+    """绘制思维导图"""
+    from matplotlib.patches import FancyBboxPatch
+    
+    ax.text(7, 7.5, 'Model Ecosystem Mindmap', fontsize=16, ha='center', 
+            weight='bold', color='#333')
+    ax.text(7, 6.8, '(FlagEmbedding Model Ecosystem)', 
+            fontsize=12, ha='center', style='italic', color='#666')
+    
+    # 中心节点
+    center_x, center_y = 7, 4
+    center_box = FancyBboxPatch((center_x-1.2, center_y-0.4), 2.4, 0.8,
+                                boxstyle="round,pad=0.05,rounding_size=0.3",
+                                facecolor='#1976d2', edgecolor='#1565c0', linewidth=3)
+    ax.add_patch(center_box)
+    ax.text(center_x, center_y, 'FlagEmbedding', ha='center', va='center', 
+            fontsize=12, weight='bold', color='white')
+    
+    # 主要分支
+    branches = [
+        (4, 6, 'Embedder\nModels', '#e3f2fd', '#1976d2'),
+        (10, 6, 'Reranker\nModels', '#fff3e0', '#e65100'),
+        (3, 2, 'Architecture', '#f3e5f5', '#7b1fa2'),
+        (11, 2, 'Features', '#e8f5e9', '#388e3c')
+    ]
+    
+    for x, y, text, facecolor, edgecolor in branches:
+        # 绘制连接线
+        ax.plot([center_x, x], [center_y, y], '-', color='#666', lw=2)
+        
+        # 绘制分支框
+        box = FancyBboxPatch((x-1, y-0.35), 2, 0.7,
+                            boxstyle="round,pad=0.05,rounding_size=0.2",
+                            facecolor=facecolor, edgecolor=edgecolor, linewidth=2)
+        ax.add_patch(box)
+        ax.text(x, y, text, ha='center', va='center', fontsize=10, weight='bold')
+    
+    # 子分支 - 嵌入模型
+    embed_sub = [
+        (2, 5.5, 'BGE\nQwen3\nE5\nGTE\nSFR\nLinq\nBCE'),
+    ]
+    for x, y, text in embed_sub:
+        ax.text(x, y, text, ha='center', va='center', fontsize=8)
+    
+    # 子分支 - 重排序模型
+    rerank_sub = [
+        (12, 5.5, 'BGE\nJina\nGTE\nBCE'),
+    ]
+    for x, y, text in rerank_sub:
+        ax.text(x, y, text, ha='center', va='center', fontsize=8)
 
 def process_mermaid_blocks(content, output_dir):
     """处理 Markdown 中的 Mermaid 代码块"""
